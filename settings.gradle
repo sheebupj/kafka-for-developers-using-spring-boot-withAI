@@ -1,0 +1,6 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+rootProject.name = 'kafka-for-developers-using-spring-boot-withAI'
+include 'lib-events-producer-boot4'
+

@@ -1,6 +1,7 @@
 # Kafka for Developers using Spring Boot
 
 Multi-module Spring Boot project with Apache Kafka integration.
+using java 25 springboot 4 kafka and github copilot
 
 ## Modules
 
