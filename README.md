@@ -1,26 +1,24 @@
 # Kafka for Developers using Spring Boot
 
-Multi-module Spring Boot project with Apache Kafka integration.
-using java 25 springboot 4 kafka and github copilot
+Gradle multi-module Spring Boot project with Apache Kafka integration.
 
-## Modules
+**Technologies:** Java 25, Spring Boot 4, Apache Kafka, GitHub Copilot
+
+## Project Structure
+
+This is a **Gradle multi-module project** where all modules are defined in the root `build.gradle` and included in `settings.gradle`.
+
+### Modules
 
 - **lib-events-producer-boot4** - Kafka producer application
-- *Add more modules here*
 
 ## Setup
 
-### Clone with Submodules
+### Clone the Repository
 
 ```bash
-git clone --recurse-submodules <repo-url>
-```
-
-If you already cloned without submodules:
-
-```bash
-git submodule init
-git submodule update --recursive
+git clone <repo-url>
+cd kafka-for-developers-using-spring-boot-withAI
 ```
 
 ### Build All Modules
@@ -32,46 +30,68 @@ git submodule update --recursive
 ### Build Specific Module
 
 ```bash
+./gradlew :lib-events-producer-boot4:build
+```
+
+Or from the module directory:
+
+```bash
 cd lib-events-producer-boot4
 ./gradlew build
 ```
 
-## Adding New Submodules
-
-To add a new Spring Boot module as a submodule:
+### Run Specific Module
 
 ```bash
-git submodule add <module-repo-url> <module-name>
-git add .gitmodules <module-name>
-git commit -m "Add new submodule: <module-name>"
-git push
+./gradlew :lib-events-producer-boot4:bootRun
 ```
 
-## Working with Submodules
+## Adding New Modules
 
-### Update all submodules
+To add a new Spring Boot module to the project:
+
+1. Create a new directory for the module in the root:
+   ```bash
+   mkdir new-module-name
+   ```
+
+2. Add the module to `settings.gradle`:
+   ```gradle
+   include 'new-module-name'
+   ```
+
+3. Create module structure with `build.gradle`:
+   ```gradle
+   plugins {
+       id 'org.springframework.boot'
+       id 'io.spring.dependency-management'
+   }
+
+   dependencies {
+       // Add module dependencies here
+   }
+   ```
+
+4. Rebuild the project:
+   ```bash
+   ./gradlew build
+   ```
+
+## Common Gradle Commands
 
 ```bash
-git submodule update --remote --merge
-```
+# Clean all modules
+./gradlew clean
 
-### Pull changes from all submodules
+# Run tests for all modules
+./gradlew test
 
-```bash
-git pull --recurse-submodules
-```
+# Run tests for a specific module
+./gradlew :lib-events-producer-boot4:test
 
-### Commit changes in submodule
+# Build and run a specific module
+./gradlew :lib-events-producer-boot4:bootRun
 
-```bash
-cd lib-events-producer-boot4
-git add .
-git commit -m "Your changes"
-git push origin main
-
-# Return to root
-cd ..
-git add lib-events-producer-boot4
-git commit -m "Update submodule reference"
-git push
+# List all tasks
+./gradlew tasks
 ```
