@@ -1,0 +1,3 @@
+[submodule "lib-events-producer-boot4"]
+	path = lib-events-producer-boot4
+	url = ../lib-events-producer-boot4
