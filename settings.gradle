@@ -1,0 +1,3 @@
+rootProject.name = 'kafka-for-developers'
+
+include 'lib-events-producer-boot4'
