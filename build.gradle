@@ -11,12 +11,6 @@ subprojects {
 	apply plugin: 'java'
 	apply plugin: 'io.spring.dependency-management'
 
-	java {
-		toolchain {
-			languageVersion = JavaLanguageVersion.of(25)
-		}
-	}
-
 	repositories {
 		mavenCentral()
 	}
