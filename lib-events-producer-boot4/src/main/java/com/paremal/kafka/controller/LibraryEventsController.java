@@ -45,8 +45,8 @@ public class LibraryEventsController {
     }
 
     @PutMapping("/api/v1/library-events/{libraryEventId}")
-    public ResponseEntity<?> updateLibraryEvent(@PathVariable("libraryEventId") Long libraryEventId,
-                                                @RequestBody @Valid LibraryEvent libraryEvent) {
+    public CompletableFuture<ResponseEntity<?>> updateLibraryEvent(@PathVariable("libraryEventId") Long libraryEventId,
+                                                                    @RequestBody @Valid LibraryEvent libraryEvent) {
         List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
 
         if (libraryEvent.getLibraryEventId() == null) {
@@ -65,16 +65,16 @@ public class LibraryEventsController {
                     "Validation failed",
                     errors
             );
-            return ResponseEntity.badRequest().body(errorResponse);
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(errorResponse));
         }
 
         log.info("Publishing UPDATE library event: {}", libraryEvent);
-        libraryEventService.updateLibraryEvent(libraryEvent);
-        return ResponseEntity.ok(libraryEvent);
+        return libraryEventService.updateLibraryEvent(libraryEvent)
+                .thenApply(ignored -> ResponseEntity.ok(libraryEvent));
     }
 
     @PutMapping("/v1/libraryevent")
-    public ResponseEntity<?> updateLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
+    public CompletableFuture<ResponseEntity<?>> updateLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
         List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
 
         if (libraryEvent.getLibraryEventId() == null) {
@@ -91,11 +91,11 @@ public class LibraryEventsController {
                     "Validation failed",
                     errors
             );
-            return ResponseEntity.badRequest().body(errorResponse);
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(errorResponse));
         }
 
         log.info("Publishing UPDATE library event: {}", libraryEvent);
-        libraryEventService.updateLibraryEvent(libraryEvent);
-        return ResponseEntity.ok(libraryEvent);
+        return libraryEventService.updateLibraryEvent(libraryEvent)
+                .thenApply(ignored -> ResponseEntity.ok(libraryEvent));
     }
 }

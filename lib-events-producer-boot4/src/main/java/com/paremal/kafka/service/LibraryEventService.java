@@ -1,6 +1,5 @@
 package com.paremal.kafka.service;
 
-import com.paremal.kafka.exception.KafkaPublishException;
 import com.paremal.kafka.producer.LibraryEventsProducer;
 import com.paremal.kafka.model.LibraryEvent;
 import org.slf4j.Logger;
@@ -38,21 +37,22 @@ public class LibraryEventService {
                 });
     }
 
-    public void publishUpdate(LibraryEvent libraryEvent) {
-        updateLibraryEvent(libraryEvent);
+    public CompletableFuture<RecordMetadata> publishUpdate(LibraryEvent libraryEvent) {
+        return updateLibraryEvent(libraryEvent);
     }
 
-    public void updateLibraryEvent(LibraryEvent libraryEvent) {
+    public CompletableFuture<RecordMetadata> updateLibraryEvent(LibraryEvent libraryEvent) {
         if (libraryEvent.getTimestamp() == null) {
             libraryEvent.setTimestamp(Instant.now());
         }
         String key = libraryEvent.getLibraryEventId().toString();
-        try {
-            RecordMetadata md = producer.sendSynchronously(key, libraryEvent);
-            log.debug("Published UPDATE event id={} partition={} offset={}", libraryEvent.getLibraryEventId(), md.partition(), md.offset());
-        } catch (KafkaPublishException e) {
-            log.error("Failed to publish UPDATE event id={}", libraryEvent.getLibraryEventId(), e);
-            throw e;
-        }
+        return producer.send(key, libraryEvent)
+                .whenComplete((md, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to publish UPDATE event id={}", libraryEvent.getLibraryEventId(), ex);
+                        return;
+                    }
+                    log.debug("Published UPDATE event id={} partition={} offset={}", libraryEvent.getLibraryEventId(), md.partition(), md.offset());
+                });
     }
 }
