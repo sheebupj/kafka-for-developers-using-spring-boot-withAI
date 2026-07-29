@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/v1/library-events")
@@ -27,7 +28,7 @@ public class LibraryEventsController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
+    public CompletableFuture<ResponseEntity<?>> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
         if (libraryEvent.getEventType() != EventType.ADD) {
             List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
             errors.add(new ApiErrorResponse.FieldError("eventType", "eventType must be ADD for POST endpoint"));
@@ -36,12 +37,12 @@ public class LibraryEventsController {
                     "Validation failed",
                     errors
             );
-            return ResponseEntity.badRequest().body(errorResponse);
+            return CompletableFuture.completedFuture(ResponseEntity.badRequest().body(errorResponse));
         }
 
         log.info("Publishing ADD library event: {}", libraryEvent);
-        libraryEventService.publishAdd(libraryEvent);
-        return ResponseEntity.status(HttpStatus.CREATED).body(libraryEvent);
+        return libraryEventService.publishAdd(libraryEvent)
+                .thenApply(ignored -> ResponseEntity.status(HttpStatus.CREATED).body(libraryEvent));
     }
 
     @PutMapping("/{libraryEventId}")

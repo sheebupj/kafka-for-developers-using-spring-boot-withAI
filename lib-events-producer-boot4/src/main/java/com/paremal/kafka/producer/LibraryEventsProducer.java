@@ -16,6 +16,8 @@ import io.micrometer.core.instrument.Counter;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 public class LibraryEventsProducer {
@@ -42,26 +44,33 @@ public class LibraryEventsProducer {
      */
     public CompletableFuture<RecordMetadata> send(String topic, String key, LibraryEvent value) {
         String existingCorrelation = MDC.get("correlationId");
-                final String correlationId = (existingCorrelation != null) ? existingCorrelation : key;
-                if (existingCorrelation == null) {
-                    MDC.put("correlationId", correlationId);
+        final String correlationId = (existingCorrelation != null) ? existingCorrelation : key;
+        final boolean correlationIdAdded = existingCorrelation == null;
+        if (correlationIdAdded) {
+            MDC.put("correlationId", correlationId);
+        }
+
+        CompletableFuture<RecordMetadata> resultFuture = new CompletableFuture<>();
+        try {
+            kafkaTemplate.send(topic, key, value).whenComplete((result, ex) -> {
+                if (ex != null) {
+                    log.error("correlationId={} Failed to send message to topic {}", correlationId, topic, ex);
+                    resultFuture.completeExceptionally(new KafkaPublishException("Failed to publish message to Kafka", ex));
+                    return;
                 }
-
-                CompletableFuture<RecordMetadata> resultFuture = new CompletableFuture<>();
-
-        kafkaTemplate.send(topic, key, value).whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("correlationId={} Failed to send message to topic {}", correlationId, topic, ex);
-                        resultFuture.completeExceptionally(new KafkaPublishException("Failed to publish message to Kafka", ex));
-                        MDC.remove("correlationId");
-                        return;
-                    }
-                    RecordMetadata metadata = result.getRecordMetadata();
-                    log.info("correlationId={} Message sent to topic {} partition {} offset {}", correlationId, topic, metadata.partition(), metadata.offset());
-                    producedCounter.increment();
-                    resultFuture.complete(metadata);
-                    MDC.remove("correlationId");
-                });
+                RecordMetadata metadata = result.getRecordMetadata();
+                log.info("correlationId={} Message sent to topic {} partition {} offset {}", correlationId, topic, metadata.partition(), metadata.offset());
+                producedCounter.increment();
+                resultFuture.complete(metadata);
+            });
+        } catch (RuntimeException ex) {
+            log.error("correlationId={} Failed to send message to topic {}", correlationId, topic, ex);
+            resultFuture.completeExceptionally(new KafkaPublishException("Failed to publish message to Kafka", ex));
+        } finally {
+            if (correlationIdAdded) {
+                MDC.remove("correlationId");
+            }
+        }
 
         return resultFuture;
     }
@@ -77,12 +86,13 @@ public class LibraryEventsProducer {
     public RecordMetadata sendSynchronously(String topic, String key, LibraryEvent value) {
         String existingCorrelation = MDC.get("correlationId");
         final String correlationId = (existingCorrelation != null) ? existingCorrelation : key;
-        if (existingCorrelation == null) {
+        final boolean correlationIdAdded = existingCorrelation == null;
+        if (correlationIdAdded) {
             MDC.put("correlationId", correlationId);
         }
 
         try {
-            SendResult<String, Object> result = kafkaTemplate.send(topic, key, value).get();
+            SendResult<String, Object> result = kafkaTemplate.send(topic, key, value).get(10, TimeUnit.SECONDS);
             RecordMetadata metadata = result.getRecordMetadata();
             log.info("correlationId={} Message sent to topic {} partition {} offset {}", correlationId, topic, metadata.partition(), metadata.offset());
             producedCounter.increment();
@@ -94,8 +104,13 @@ public class LibraryEventsProducer {
         } catch (ExecutionException ex) {
             log.error("correlationId={} Failed to send message to topic {}", correlationId, topic, ex);
             throw new KafkaPublishException("Failed to publish message to Kafka", ex);
+        } catch (TimeoutException ex) {
+            log.error("correlationId={} Timed out while sending message to topic {}", correlationId, topic, ex);
+            throw new KafkaPublishException("Timed out while publishing message to Kafka", ex);
         } finally {
-            MDC.remove("correlationId");
+            if (correlationIdAdded) {
+                MDC.remove("correlationId");
+            }
         }
     }
 
