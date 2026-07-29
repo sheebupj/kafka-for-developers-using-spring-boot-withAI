@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
-@RequestMapping("/api/v1/library-events")
 public class LibraryEventsController {
 
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsController.class);
@@ -27,7 +26,7 @@ public class LibraryEventsController {
         this.libraryEventService = libraryEventService;
     }
 
-    @PostMapping
+    @PostMapping("/api/v1/library-events")
     public CompletableFuture<ResponseEntity<?>> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
         if (libraryEvent.getEventType() != EventType.ADD) {
             List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
@@ -45,12 +44,14 @@ public class LibraryEventsController {
                 .thenApply(ignored -> ResponseEntity.status(HttpStatus.CREATED).body(libraryEvent));
     }
 
-    @PutMapping("/{libraryEventId}")
+    @PutMapping("/api/v1/library-events/{libraryEventId}")
     public ResponseEntity<?> updateLibraryEvent(@PathVariable("libraryEventId") Long libraryEventId,
                                                 @RequestBody @Valid LibraryEvent libraryEvent) {
         List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
 
-        if (!libraryEventId.equals(libraryEvent.getLibraryEventId())) {
+        if (libraryEvent.getLibraryEventId() == null) {
+            errors.add(new ApiErrorResponse.FieldError("libraryEventId", "libraryEventId is required"));
+        } else if (!libraryEventId.equals(libraryEvent.getLibraryEventId())) {
             errors.add(new ApiErrorResponse.FieldError("libraryEventId", "Path libraryEventId must match body.libraryEventId"));
         }
 
@@ -68,7 +69,33 @@ public class LibraryEventsController {
         }
 
         log.info("Publishing UPDATE library event: {}", libraryEvent);
-        libraryEventService.publishUpdate(libraryEvent);
+        libraryEventService.updateLibraryEvent(libraryEvent);
+        return ResponseEntity.ok(libraryEvent);
+    }
+
+    @PutMapping("/v1/libraryevent")
+    public ResponseEntity<?> updateLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
+        List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
+
+        if (libraryEvent.getLibraryEventId() == null) {
+            errors.add(new ApiErrorResponse.FieldError("libraryEventId", "libraryEventId is required"));
+        }
+
+        if (libraryEvent.getEventType() != EventType.UPDATE) {
+            errors.add(new ApiErrorResponse.FieldError("eventType", "eventType must be UPDATE for PUT endpoint"));
+        }
+
+        if (!errors.isEmpty()) {
+            ApiErrorResponse errorResponse = new ApiErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Validation failed",
+                    errors
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        log.info("Publishing UPDATE library event: {}", libraryEvent);
+        libraryEventService.updateLibraryEvent(libraryEvent);
         return ResponseEntity.ok(libraryEvent);
     }
 }

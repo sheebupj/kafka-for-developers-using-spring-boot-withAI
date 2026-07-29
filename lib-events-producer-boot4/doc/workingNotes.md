@@ -69,3 +69,36 @@ git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-sprin
 
 git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI' 
    --no-pager diff -- lib-events-producer-boot4/src/main/java/com/paremal
+
+
+Controller
+
+Add PUT /v1/libraryevent handler in LibraryEventsController.
+
+Validate request body using @Valid.
+
+Enforce eventType == UPDATE; reject with 400 otherwise.
+
+Enforce non-null libraryEventId; reject with 400 if missing.
+
+Return 200 OK with the full LibraryEvent payload.
+
+Service
+
+Implement LibraryEventService.updateLibraryEvent(LibraryEvent event).
+
+Delegate publish to LibraryEventProducer.
+
+Kafka Producer
+
+Extend LibraryEventProducer to handle the UPDATE publish path if needed.
+
+Reuse topic config and key strategy from Flow 1.
+
+Deliverables
+
+PUT handler wired through service to the Kafka producer.
+
+Exit Criteria
+
+A valid UPDATE event with a non-null id PUT to the endpoint is published to the Kafka topic and returns 200 with full payload.

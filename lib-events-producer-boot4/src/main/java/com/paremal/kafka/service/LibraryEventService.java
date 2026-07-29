@@ -9,9 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
 
@@ -42,19 +39,20 @@ public class LibraryEventService {
     }
 
     public void publishUpdate(LibraryEvent libraryEvent) {
+        updateLibraryEvent(libraryEvent);
+    }
+
+    public void updateLibraryEvent(LibraryEvent libraryEvent) {
         if (libraryEvent.getTimestamp() == null) {
             libraryEvent.setTimestamp(Instant.now());
         }
         String key = libraryEvent.getLibraryEventId().toString();
         try {
-            RecordMetadata md = producer.send(key, libraryEvent).get(10, TimeUnit.SECONDS);
+            RecordMetadata md = producer.sendSynchronously(key, libraryEvent);
             log.debug("Published UPDATE event id={} partition={} offset={}", libraryEvent.getLibraryEventId(), md.partition(), md.offset());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new KafkaPublishException("Interrupted while publishing message", e);
-        } catch (ExecutionException | TimeoutException e) {
+        } catch (KafkaPublishException e) {
             log.error("Failed to publish UPDATE event id={}", libraryEvent.getLibraryEventId(), e);
-            throw new KafkaPublishException("Failed to publish message", e);
+            throw e;
         }
     }
 }
