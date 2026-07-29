@@ -7,16 +7,16 @@ import jakarta.validation.constraints.Size;
 
 public class Book {
 
-    @NotNull
-    @Positive
+    @NotNull(message = "bookId is required")
+    @Positive(message = "bookId must be a positive number")
     private Integer bookId;
 
-    @NotBlank
-    @Size(max = 255)
+    @NotBlank(message = "bookName is required")
+    @Size(max = 255, message = "bookName cannot exceed 255 characters")
     private String bookName;
 
-    @NotBlank
-    @Size(max = 255)
+    @NotBlank(message = "bookAuthor is required")
+    @Size(max = 255, message = "bookAuthor cannot exceed 255 characters")
     private String bookAuthor;
 
     public Book() {

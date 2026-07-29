@@ -1,5 +1,6 @@
 package com.paremal.kafka.controller;
 
+import com.paremal.kafka.exception.ApiErrorResponse;
 import com.paremal.kafka.model.EventType;
 import com.paremal.kafka.model.LibraryEvent;
 import com.paremal.kafka.service.LibraryEventService;
@@ -8,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/library-events")
@@ -26,16 +27,16 @@ public class LibraryEventsController {
     }
 
     @PostMapping
-    public ResponseEntity<?> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            String errors = bindingResult.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : e.toString())
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(errors);
-        }
-
+    public ResponseEntity<?> postLibraryEvent(@RequestBody @Valid LibraryEvent libraryEvent) {
         if (libraryEvent.getEventType() != EventType.ADD) {
-            return ResponseEntity.badRequest().body("eventType must be ADD for POST endpoint");
+            List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
+            errors.add(new ApiErrorResponse.FieldError("eventType", "eventType must be ADD for POST endpoint"));
+            ApiErrorResponse errorResponse = new ApiErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Validation failed",
+                    errors
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
         }
 
         log.info("Publishing ADD library event: {}", libraryEvent);
@@ -45,21 +46,24 @@ public class LibraryEventsController {
 
     @PutMapping("/{libraryEventId}")
     public ResponseEntity<?> updateLibraryEvent(@PathVariable("libraryEventId") Long libraryEventId,
-                                                @RequestBody @Valid LibraryEvent libraryEvent,
-                                                BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            String errors = bindingResult.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage() != null ? e.getDefaultMessage() : e.toString())
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(errors);
-        }
+                                                @RequestBody @Valid LibraryEvent libraryEvent) {
+        List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
 
         if (!libraryEventId.equals(libraryEvent.getLibraryEventId())) {
-            return ResponseEntity.badRequest().body("Path libraryEventId must match body.libraryEventId");
+            errors.add(new ApiErrorResponse.FieldError("libraryEventId", "Path libraryEventId must match body.libraryEventId"));
         }
 
         if (libraryEvent.getEventType() != EventType.UPDATE) {
-            return ResponseEntity.badRequest().body("eventType must be UPDATE for PUT endpoint");
+            errors.add(new ApiErrorResponse.FieldError("eventType", "eventType must be UPDATE for PUT endpoint"));
+        }
+
+        if (!errors.isEmpty()) {
+            ApiErrorResponse errorResponse = new ApiErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Validation failed",
+                    errors
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
         }
 
         log.info("Publishing UPDATE library event: {}", libraryEvent);

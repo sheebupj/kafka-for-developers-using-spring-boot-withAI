@@ -9,14 +9,14 @@ import java.time.Instant;
 
 public class LibraryEvent {
 
-    @NotNull
-    @Positive
+    @NotNull(message = "libraryEventId is required")
+    @Positive(message = "libraryEventId must be a positive number")
     private Long libraryEventId;
 
-    @NotNull
+    @NotNull(message = "eventType is required")
     private EventType eventType;
 
-    @NotNull
+    @NotNull(message = "book is required")
     @Valid
     private Book book;
 
