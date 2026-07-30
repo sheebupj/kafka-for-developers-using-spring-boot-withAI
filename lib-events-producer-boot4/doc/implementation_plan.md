@@ -29,6 +29,17 @@ Tasks
         key-serializer: org.apache.kafka.common.serialization.StringSerializer
         value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 - Add configurable retry/backoff properties and timeouts
+- Add Spring profile files for environment-specific values:
+  - src/main/resources/application-dev.yml
+  - src/main/resources/application-stage.yml
+  - src/main/resources/application-prod.yml
+- Keep only common defaults in application.yml and move differing values (bootstrap servers, DB URLs, log levels, feature flags) into profile files
+- Activate profile per runtime:
+  - Local dev: SPRING_PROFILES_ACTIVE=dev
+  - Stage: SPRING_PROFILES_ACTIVE=stage
+  - Production: SPRING_PROFILES_ACTIVE=prod
+- For local runs, allow override with CLI: --spring.profiles.active=dev
+- Keep secrets out of repo; reference env vars in YAML (example: ${DB_PASSWORD})
 
 3) Domain & DTOs (validation)
 - model/Book.java
@@ -105,4 +116,3 @@ Next steps
 - Start implementing chosen tasks (recommend starting with project bootstrap and configuration)
 
 Saved: 2026-07-22
-
