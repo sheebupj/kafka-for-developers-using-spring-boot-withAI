@@ -7,6 +7,11 @@ This document contains curl commands to test the payload validations for the Lib
 http://localhost:8080/api/v1/library-events
 ```
 
+## Additional PUT Endpoint
+```
+http://localhost:8080/v1/libraryevent
+```
+
 ## Test Data Reference
 
 ### Validation Rules:
@@ -67,6 +72,21 @@ curl -X PUT http://localhost:8080/api/v1/library-events/3 \
       "bookId": 103,
       "bookName": "Clean Code",
       "bookAuthor": "Robert C. Martin"
+    }
+  }'
+```
+
+### 3a. Valid PUT Request (UPDATE Event - `/v1/libraryevent`)
+```bash
+curl -X PUT http://localhost:8080/v1/libraryevent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "libraryEventId": 31,
+    "eventType": "UPDATE",
+    "book": {
+      "bookId": 131,
+      "bookName": "Domain-Driven Design",
+      "bookAuthor": "Eric Evans"
     }
   }'
 ```
@@ -395,6 +415,37 @@ curl -X PUT http://localhost:8080/api/v1/library-events/24 \
       "bookId": 124,
       "bookName": "Guns Germs and Steel",
       "bookAuthor": "Jared Diamond"
+    }
+  }'
+```
+**Expected Error**: eventType must be UPDATE for PUT endpoint
+
+### 24a. `/v1/libraryevent` PUT with Missing libraryEventId
+```bash
+curl -X PUT http://localhost:8080/v1/libraryevent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventType": "UPDATE",
+    "book": {
+      "bookId": 224,
+      "bookName": "Thinking in Java",
+      "bookAuthor": "Bruce Eckel"
+    }
+  }'
+```
+**Expected Error**: libraryEventId is required
+
+### 24b. `/v1/libraryevent` PUT with Wrong eventType (ADD instead of UPDATE)
+```bash
+curl -X PUT http://localhost:8080/v1/libraryevent \
+  -H "Content-Type: application/json" \
+  -d '{
+    "libraryEventId": 241,
+    "eventType": "ADD",
+    "book": {
+      "bookId": 241,
+      "bookName": "The Phoenix Project",
+      "bookAuthor": "Gene Kim"
     }
   }'
 ```
