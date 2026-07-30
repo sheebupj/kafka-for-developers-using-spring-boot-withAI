@@ -1,0 +1,12 @@
+spring:
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+library:
+  events:
+    topic: ${LIBRARY_EVENTS_TOPIC:library-events}
+
+logging:
+  level:
+    root: INFOgit add
+    com.paremal.kafka: DEBUG
