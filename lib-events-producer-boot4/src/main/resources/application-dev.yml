@@ -8,5 +8,5 @@ library:
 
 logging:
   level:
-    root: INFOgit add
+    root: INFO
     com.paremal.kafka: DEBUG
