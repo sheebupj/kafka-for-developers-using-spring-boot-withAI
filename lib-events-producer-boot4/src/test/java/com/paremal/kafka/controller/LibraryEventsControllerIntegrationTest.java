@@ -187,6 +187,129 @@ class LibraryEventsControllerIntegrationTest {
             assertThat(e.getResponseBodyAsString()).contains("bookName");
         }
     }
+
+    @Test
+    void putLibraryEvent_validInput_returnsOkAndPublishesToKafka() {
+        // Given - Use high ID to avoid previous test messages
+        String payload = """
+                {
+                  "libraryEventId": 999,
+                  "eventType": "UPDATE",
+                  "book": {
+                    "bookId": 200,
+                    "bookName": "Kafka Streams in Action",
+                    "bookAuthor": "Bill Bejeck"
+                  }
+                }
+                """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+
+        // When
+        ResponseEntity<LibraryEvent> response = restTemplate.exchange(
+                baseUrl + "/api/v1/library-events/999",
+                org.springframework.http.HttpMethod.PUT,
+                request,
+                LibraryEvent.class
+        );
+
+        // Then - HTTP response
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getLibraryEventId()).isEqualTo(999L);
+        assertThat(response.getBody().getEventType()).isEqualTo(EventType.UPDATE);
+
+        // Then - Kafka message - poll multiple times to find our message
+        var found = false;
+        var endTime = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < endTime && !found) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofSeconds(1));
+            for (var record : records) {
+                if (record.value().contains("\"libraryEventId\":999")) {
+                    assertThat(record.key()).isEqualTo("999");
+                    assertThat(record.value())
+                            .contains("\"libraryEventId\":999")
+                            .contains("\"eventType\":\"UPDATE\"")
+                            .contains("\"bookId\":200");
+                    found = true;
+                    break;
+                }
+            }
+        }
+        assertThat(found).isTrue();
+    }
+
+    @Test
+    void putLibraryEvent_pathBodyIdMismatch_returns400() {
+        // Given - path ID is 5, but body ID is 10 (mismatch)
+        String payload = """
+                {
+                  "libraryEventId": 10,
+                  "eventType": "UPDATE",
+                  "book": {
+                    "bookId": 300,
+                    "bookName": "Learning Kafka",
+                    "bookAuthor": "Confluent Team"
+                  }
+                }
+                """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+
+        // When & Then
+        try {
+            restTemplate.exchange(
+                    baseUrl + "/api/v1/library-events/5",
+                    org.springframework.http.HttpMethod.PUT,
+                    request,
+                    String.class
+            );
+            assertThat(false).isTrue();
+        } catch (HttpClientErrorException e) {
+            // Then
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(e.getResponseBodyAsString()).contains("Path libraryEventId must match body.libraryEventId");
+        }
+    }
+
+    @Test
+    void putLibraryEvent_invalidEventType_returns400() {
+        // Given - eventType is ADD, but PUT expects UPDATE
+        String payload = """
+                {
+                  "libraryEventId": 15,
+                  "eventType": "ADD",
+                  "book": {
+                    "bookId": 400,
+                    "bookName": "Kafka in Production",
+                    "bookAuthor": "Jay Kreps"
+                  }
+                }
+                """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> request = new HttpEntity<>(payload, headers);
+
+        // When & Then
+        try {
+            restTemplate.exchange(
+                    baseUrl + "/api/v1/library-events/15",
+                    org.springframework.http.HttpMethod.PUT,
+                    request,
+                    String.class
+            );
+            assertThat(false).isTrue();
+        } catch (HttpClientErrorException e) {
+            // Then
+            assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+            assertThat(e.getResponseBodyAsString()).contains("eventType must be UPDATE for PUT endpoint");
+        }
+    }
 }
 
 
