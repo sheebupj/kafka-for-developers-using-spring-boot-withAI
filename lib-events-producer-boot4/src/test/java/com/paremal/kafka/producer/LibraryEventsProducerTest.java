@@ -15,10 +15,14 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -61,5 +65,60 @@ class LibraryEventsProducerTest {
                 .isInstanceOf(java.util.concurrent.CompletionException.class)
                 .hasCauseInstanceOf(KafkaPublishException.class);
     }
-}
 
+    @Test
+    void sendSynchronously_wrapsExecutionExceptionInKafkaPublishException() throws Exception {
+        LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
+        @SuppressWarnings("unchecked")
+        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        ExecutionException executionException = new ExecutionException(new RuntimeException("broker down"));
+
+        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+                .thenReturn(future);
+        when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(executionException);
+
+        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+                .isInstanceOf(KafkaPublishException.class)
+                .hasMessage("Failed to publish message to Kafka")
+                .hasCause(executionException);
+    }
+
+    @Test
+    void sendSynchronously_wrapsTimeoutExceptionInKafkaPublishException() throws Exception {
+        LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
+        @SuppressWarnings("unchecked")
+        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        TimeoutException timeoutException = new TimeoutException("timed out");
+
+        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+                .thenReturn(future);
+        when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(timeoutException);
+
+        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+                .isInstanceOf(KafkaPublishException.class)
+                .hasMessage("Timed out while publishing message to Kafka")
+                .hasCause(timeoutException);
+    }
+
+    @Test
+    void sendSynchronously_wrapsInterruptedExceptionInKafkaPublishException_andReInterruptsThread() throws Exception {
+        LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
+        @SuppressWarnings("unchecked")
+        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        InterruptedException interruptedException = new InterruptedException("interrupted");
+
+        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+                .thenReturn(future);
+        when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(interruptedException);
+
+        try {
+            assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+                    .isInstanceOf(KafkaPublishException.class)
+                    .hasMessage("Failed to publish message to Kafka")
+                    .hasCause(interruptedException);
+            assertThat(Thread.currentThread().isInterrupted()).isTrue();
+        } finally {
+            assertThat(Thread.interrupted()).isTrue();
+        }
+    }
+}

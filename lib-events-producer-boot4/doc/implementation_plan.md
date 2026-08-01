@@ -89,21 +89,37 @@ Tasks
 - Use structured JSON logs (include request-id, libraryEventId, eventType)
 - Optionally add OpenTelemetry spans around request -> publish
 
-9) Testing: unit
+9) API docs: Swagger/OpenAPI
+- Add dependency for OpenAPI generation/UI (springdoc starter for WebMVC)
+- Add OpenAPI metadata (title, version, description, contact) via @OpenAPIDefinition or bean config
+- Annotate endpoints with @Operation and include request/response examples for POST/PUT
+- Group/tag Library Events APIs for cleaner Swagger UI navigation
+- Enable and configure Swagger UI landing page (title, default expansion, operations sorter)
+- Expose and verify:
+  - Swagger UI: /swagger-ui/index.html
+  - OpenAPI JSON: /v3/api-docs
+  - OpenAPI YAML: /v3/api-docs.yaml
+- Add quick validation step: open Swagger UI and execute POST/PUT from the browser
+- Add build step/command to export spec artifact:
+  - curl http://localhost:8080/v3/api-docs > openapi.json
+  - curl http://localhost:8080/v3/api-docs.yaml > openapi.yaml
+- Store generated spec under docs/api/ (or publish as CI artifact) and keep it in sync with endpoint changes
+
+10) Testing: unit
 - Controller tests with MockMvc and mocked LibraryEventService
 - Service/Producer unit tests mocking KafkaTemplate to assert send behavior and exception handling
 - Validation tests for DTO constraints
 
-10) Testing: integration
+11) Testing: integration
 - EmbeddedKafka tests verifying message key and value on "library-events" topic
 - Tests for success (POST/PUT) and failure (simulate broker down) leading to 503
 - Use @SpringBootTest with test-specific application.yml overrides
 
-11) CI/Docker
+12) CI/Docker
 - Dockerfile for running the app (runtime image: Temurin 25 or Eclipse Temurin JRE)
 - GitHub Actions: build -> unit tests -> integration (if feasible) -> build/publish image
 
-12) Acceptance & docs
+13) Acceptance & docs
 - small README.md / OpenAPI snippet showing endpoints and example payloads
 - Map PRD acceptance criteria to automated test cases
 
