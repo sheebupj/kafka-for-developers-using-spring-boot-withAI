@@ -102,3 +102,20 @@ PUT handler wired through service to the Kafka producer.
 Exit Criteria
 
 A valid UPDATE event with a non-null id PUT to the endpoint is published to the Kafka topic and returns 200 with full payload.
+
+I want you to create a skill file for me for the integration testing.
+Please ensure the skill is going to cover the right annotations, and since this is a kaka producer app it should use embedded for the kafka infrastructure.
+mocvkMVC for the endpoint calls.
+Ensure to use @SpringBootTest to load the whole spring context.
+
+there is a file ".github/skills/integration-testing/SKILL.md" already present here.
+
+
+
+I would like to create another skill for the controller class that I have here.
+Any interegration with the kafkaTemplate should return a CompletableFuture.
+If the integration is a DB then I would like return the regular types or the return value wrapped in a ResponseEntity.
+I want the errorhandling to be done using the RestControllerAdvice annotation.
+Payload validations very similr to what we have in the LibraryEventsController.
+
+please go ahead and create the skill with the namje of controller-skill under the ".github/skills" folder
