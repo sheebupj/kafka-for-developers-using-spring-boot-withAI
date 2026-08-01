@@ -72,7 +72,7 @@ implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
 
 ### 2. OpenAPI Bean (`OpenApiConfig.java`)
 
-`src/main/java/com/learnkafka/config/OpenApiConfig.java` provides the top-level metadata: title, description, version, contact, license, and server URLs.
+`src/main/java/com/paremal/kafka/config/OpenApiConfig.java` provides the top-level metadata: title, description, version, and contact.
 
 ```java
 @Bean
@@ -99,10 +99,12 @@ Key OpenAPI annotations used on `LibraryEventsController`:
 ```yaml
 springdoc:
   api-docs:
-    path: /api-docs          # raw OpenAPI JSON
+    path: /v3/api-docs          # raw OpenAPI JSON
   swagger-ui:
-    path: /swagger-ui.html   # interactive UI
-    operationsSorter: method  # sorts endpoints by HTTP method (DELETE, GET, POST, PUT)
+    path: /swagger-ui/index.html   # interactive UI
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
 ```
 
 ### 5. Accessing the Docs
@@ -111,9 +113,9 @@ Once the application is running:
 
 | URL | Content |
 |---|---|
-| `http://localhost:8080/swagger-ui.html` | Interactive Swagger UI |
-| `http://localhost:8080/api-docs` | Raw OpenAPI 3.0 JSON spec |
-| `http://localhost:8080/api-docs.yaml` | Raw OpenAPI 3.0 YAML spec |
+| `http://localhost:8080/swagger-ui/index.html` | Interactive Swagger UI |
+| `http://localhost:8080/v3/api-docs` | Raw OpenAPI 3.0 JSON spec |
+| `http://localhost:8080/v3/api-docs.yaml` | Raw OpenAPI 3.0 YAML spec |
 
 ---
 

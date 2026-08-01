@@ -26,3 +26,12 @@ management:
 library:
   events:
     topic: ${LIBRARY_EVENTS_TOPIC:library-events}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+    doc-expansion: none
+    operations-sorter: method
+    tags-sorter: alpha

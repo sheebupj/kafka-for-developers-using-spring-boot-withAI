@@ -1,0 +1,204 @@
+openapi: 3.1.0
+info:
+  title: Library Events Producer API
+  description: REST API to publish library events to Kafka
+  contact:
+    name: Library Events Team
+    email: support@example.com
+  version: v1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Library Events
+  description: Operations for publishing library events to Kafka
+paths:
+  /v1/libraryevent:
+    put:
+      tags:
+      - Library Events
+      summary: Update library event (legacy endpoint)
+      description: Legacy update endpoint that publishes an UPDATE event to Kafka.
+      operationId: updateLibraryEvent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryEvent"
+        required: true
+      responses:
+        "503":
+          description: Kafka publish failure
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "200":
+          description: Event accepted and published
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LibraryEvent"
+        "400":
+          description: Validation error
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /api/v1/library-events/{libraryEventId}:
+    put:
+      tags:
+      - Library Events
+      summary: Update library event
+      description: Publishes an UPDATE library event to Kafka.
+      operationId: updateLibraryEvent_1
+      parameters:
+      - name: libraryEventId
+        in: path
+        description: Library event id in path; must match payload libraryEventId
+        required: true
+        schema:
+          type: integer
+          format: int64
+        example: 10
+      requestBody:
+        description: Library event payload with eventType=UPDATE and matching libraryEventId
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryEvent"
+            examples:
+              updateEvent:
+                description: updateEvent
+                value:
+                  libraryEventId: 10
+                  eventType: UPDATE
+                  book:
+                    bookId: 200
+                    bookName: Kafka Streams in Action
+                    bookAuthor: Bill Bejeck
+        required: true
+      responses:
+        "503":
+          description: Kafka publish failure
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "200":
+          description: Event accepted and published
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LibraryEvent"
+        "400":
+          description: Validation error
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /api/v1/library-events:
+    post:
+      tags:
+      - Library Events
+      summary: Create library event
+      description: Publishes an ADD library event to Kafka.
+      operationId: postLibraryEvent
+      requestBody:
+        description: Library event payload with eventType=ADD
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryEvent"
+            examples:
+              addEvent:
+                description: addEvent
+                value:
+                  libraryEventId: 1
+                  eventType: ADD
+                  book:
+                    bookId: 123
+                    bookName: Kafka Using Spring Boot
+                    bookAuthor: Dilip
+        required: true
+      responses:
+        "503":
+          description: Kafka publish failure
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "201":
+          description: Event accepted and published
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/LibraryEvent"
+        "400":
+          description: Validation error
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+components:
+  schemas:
+    Book:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int32
+        bookName:
+          type: string
+          maxLength: 255
+          minLength: 0
+        bookAuthor:
+          type: string
+          maxLength: 255
+          minLength: 0
+      required:
+      - bookAuthor
+      - bookId
+      - bookName
+    LibraryEvent:
+      type: object
+      properties:
+        libraryEventId:
+          type: integer
+          format: int64
+        eventType:
+          type: string
+          enum:
+          - ADD
+          - UPDATE
+        book:
+          $ref: "#/components/schemas/Book"
+        timestamp:
+          type: string
+          format: date-time
+      required:
+      - book
+      - eventType
+      - libraryEventId
+    ApiErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldError"
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
