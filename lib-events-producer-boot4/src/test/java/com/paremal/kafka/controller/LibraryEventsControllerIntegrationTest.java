@@ -5,6 +5,7 @@ import com.paremal.kafka.model.LibraryEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +45,7 @@ class LibraryEventsControllerIntegrationTest {
     private RestTemplate restTemplate;
     private String baseUrl;
 
-    private KafkaConsumer<String, String> kafkaConsumer;
+    private KafkaConsumer<Integer, String> kafkaConsumer;
 
     @BeforeEach
     void setUp() {
@@ -57,7 +58,7 @@ class LibraryEventsControllerIntegrationTest {
         consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, "test-group-" + System.currentTimeMillis());
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, IntegerDeserializer.class);
         consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 10);
         consumerProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 10000);
@@ -106,11 +107,11 @@ class LibraryEventsControllerIntegrationTest {
         assertThat(response.getBody().getEventType()).isEqualTo(EventType.ADD);
 
         // Then - Kafka message
-        ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofSeconds(5));
+        ConsumerRecords<Integer, String> records = kafkaConsumer.poll(Duration.ofSeconds(5));
         assertThat(records).isNotEmpty();
 
         var record = records.iterator().next();
-        assertThat(record.key()).isEqualTo("1");
+        assertThat(record.key()).isEqualTo(1);
         // Verify message was published with expected content
         assertThat(record.value())
                 .contains("\"libraryEventId\":1")
@@ -225,10 +226,10 @@ class LibraryEventsControllerIntegrationTest {
         var found = false;
         var endTime = System.currentTimeMillis() + 5000;
         while (System.currentTimeMillis() < endTime && !found) {
-            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofSeconds(1));
+            ConsumerRecords<Integer, String> records = kafkaConsumer.poll(Duration.ofSeconds(1));
             for (var record : records) {
                 if (record.value().contains("\"libraryEventId\":999")) {
-                    assertThat(record.key()).isEqualTo("999");
+                    assertThat(record.key()).isEqualTo(999);
                     assertThat(record.value())
                             .contains("\"libraryEventId\":999")
                             .contains("\"eventType\":\"UPDATE\"")
@@ -311,7 +312,6 @@ class LibraryEventsControllerIntegrationTest {
         }
     }
 }
-
 
 
 

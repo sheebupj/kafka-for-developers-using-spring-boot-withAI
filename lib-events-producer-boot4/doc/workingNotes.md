@@ -119,3 +119,43 @@ I want the errorhandling to be done using the RestControllerAdvice annotation.
 Payload validations very similr to what we have in the LibraryEventsController.
 
 please go ahead and create the skill with the namje of controller-skill under the ".github/skills" folder
+
+
+./gradlew build -x test
+
+
+Step 1: Kafka Consumer + Configuration ✦ START HERE
+Path: `src/main/java/com/learnkafka/consumer`, `src/main/java/com/learnkafka/config`, `src/main/resources/application.yml`
+
+#### Goal
+Stand up a working Kafka listener that reads raw messages from `library-events` and logs them. No deserialization, no DB — just prove connectivity.
+
+#### Modules
+- `LibraryEventsConsumer`
+- `LibraryEventsConsumerConfig` (basic factory only)
+- Kafka consumer properties in `application.yml`
+
+#### Tasks
+1. Configure Kafka consumer properties in `application.yml`:
+    - `spring.kafka.consumer.bootstrap-servers`
+    - `spring.kafka.consumer.group-id=library-events-listener-group`
+    - `spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.IntegerDeserializer`
+    - `spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer`
+    - `spring.kafka.consumer.auto-offset-reset=latest`
+2. Create `LibraryEventsConsumerConfig` with a `ConcurrentKafkaListenerContainerFactory` bean (default error handler for now).
+3. Create `LibraryEventsConsumer` class annotated with `@Component`.
+4. Add `@KafkaListener(topics = "library-events")` method.
+5. Accept message as `ConsumerRecord<Integer, String>`.
+6. Log full Kafka metadata: topic, partition, offset, key, value.
+7. **No service delegation yet** — the listener just logs the raw payload.
+
+#### Deliverables
+- A running consumer that connects to Kafka and logs every message from `library-events`.
+- Kafka consumer properties externalized.
+- Basic container factory configuration.
+
+#### Acceptance Criteria
+- Application starts without errors and joins the consumer group.
+- Publishing a test message to `library-events` produces a log line with topic, partition, offset, key, and value.
+- No DB or DTO code is required at this stage.
+go ahead and  implement this step

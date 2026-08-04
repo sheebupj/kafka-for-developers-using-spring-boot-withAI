@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class LibraryEventsProducerTest {
 
     @Mock
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private KafkaTemplate<Integer, Object> kafkaTemplate;
 
     private LibraryEventsProducer libraryEventsProducer;
 
@@ -43,13 +43,13 @@ class LibraryEventsProducerTest {
     void send_returnsMetadataAndIncrementsMetricOnSuccess() {
         LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
         RecordMetadata metadata = org.mockito.Mockito.mock(RecordMetadata.class);
-        SendResult<String, Object> sendResult = org.mockito.Mockito.mock(SendResult.class);
+        SendResult<Integer, Object> sendResult = org.mockito.Mockito.mock(SendResult.class);
 
         when(sendResult.getRecordMetadata()).thenReturn(metadata);
-        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+        when(kafkaTemplate.send(eq("library-events"), eq(1), any(LibraryEvent.class)))
                 .thenReturn(CompletableFuture.completedFuture(sendResult));
 
-        RecordMetadata result = libraryEventsProducer.send("1", event).join();
+        RecordMetadata result = libraryEventsProducer.send(1, event).join();
 
         assertThat(result).isEqualTo(metadata);
     }
@@ -58,10 +58,10 @@ class LibraryEventsProducerTest {
     void send_wrapsRuntimeExceptionInKafkaPublishException() {
         LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
 
-        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+        when(kafkaTemplate.send(eq("library-events"), eq(1), any(LibraryEvent.class)))
                 .thenThrow(new RuntimeException("boom"));
 
-        assertThatThrownBy(() -> libraryEventsProducer.send("1", event).join())
+        assertThatThrownBy(() -> libraryEventsProducer.send(1, event).join())
                 .isInstanceOf(java.util.concurrent.CompletionException.class)
                 .hasCauseInstanceOf(KafkaPublishException.class);
     }
@@ -70,14 +70,14 @@ class LibraryEventsProducerTest {
     void sendSynchronously_wrapsExecutionExceptionInKafkaPublishException() throws Exception {
         LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
         @SuppressWarnings("unchecked")
-        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        CompletableFuture<SendResult<Integer, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
         ExecutionException executionException = new ExecutionException(new RuntimeException("broker down"));
 
-        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+        when(kafkaTemplate.send(eq("library-events"), eq(1), any(LibraryEvent.class)))
                 .thenReturn(future);
         when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(executionException);
 
-        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", 1, event))
                 .isInstanceOf(KafkaPublishException.class)
                 .hasMessage("Failed to publish message to Kafka")
                 .hasCause(executionException);
@@ -87,14 +87,14 @@ class LibraryEventsProducerTest {
     void sendSynchronously_wrapsTimeoutExceptionInKafkaPublishException() throws Exception {
         LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
         @SuppressWarnings("unchecked")
-        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        CompletableFuture<SendResult<Integer, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
         TimeoutException timeoutException = new TimeoutException("timed out");
 
-        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+        when(kafkaTemplate.send(eq("library-events"), eq(1), any(LibraryEvent.class)))
                 .thenReturn(future);
         when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(timeoutException);
 
-        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+        assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", 1, event))
                 .isInstanceOf(KafkaPublishException.class)
                 .hasMessage("Timed out while publishing message to Kafka")
                 .hasCause(timeoutException);
@@ -104,15 +104,15 @@ class LibraryEventsProducerTest {
     void sendSynchronously_wrapsInterruptedExceptionInKafkaPublishException_andReInterruptsThread() throws Exception {
         LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "Kafka", "Dilip"), null);
         @SuppressWarnings("unchecked")
-        CompletableFuture<SendResult<String, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
+        CompletableFuture<SendResult<Integer, Object>> future = org.mockito.Mockito.mock(CompletableFuture.class);
         InterruptedException interruptedException = new InterruptedException("interrupted");
 
-        when(kafkaTemplate.send(eq("library-events"), eq("1"), any(LibraryEvent.class)))
+        when(kafkaTemplate.send(eq("library-events"), eq(1), any(LibraryEvent.class)))
                 .thenReturn(future);
         when(future.get(anyLong(), eq(TimeUnit.SECONDS))).thenThrow(interruptedException);
 
         try {
-            assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", "1", event))
+            assertThatThrownBy(() -> libraryEventsProducer.sendSynchronously("library-events", 1, event))
                     .isInstanceOf(KafkaPublishException.class)
                     .hasMessage("Failed to publish message to Kafka")
                     .hasCause(interruptedException);

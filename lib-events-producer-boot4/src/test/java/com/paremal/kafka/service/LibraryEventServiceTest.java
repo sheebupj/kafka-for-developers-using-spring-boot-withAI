@@ -35,7 +35,7 @@ class LibraryEventServiceTest {
         RecordMetadata metadata = org.mockito.Mockito.mock(RecordMetadata.class);
         Instant beforeCall = Instant.now();
 
-        when(producer.send(eq("1"), any(LibraryEvent.class)))
+        when(producer.send(eq(1), any(LibraryEvent.class)))
                 .thenReturn(CompletableFuture.completedFuture(metadata));
 
         CompletableFuture<RecordMetadata> future = libraryEventService.publishAdd(event);
@@ -43,7 +43,7 @@ class LibraryEventServiceTest {
         assertThat(event.getTimestamp()).isNotNull();
         assertThat(event.getTimestamp()).isAfterOrEqualTo(beforeCall);
         assertThat(future.join()).isEqualTo(metadata);
-        verify(producer).send(eq("1"), any(LibraryEvent.class));
+        verify(producer).send(eq(1), any(LibraryEvent.class));
     }
 
     @Test
@@ -52,14 +52,13 @@ class LibraryEventServiceTest {
         LibraryEvent event = new LibraryEvent(2L, EventType.UPDATE, new Book(11, "Spring", "Dilip"), timestamp);
         RecordMetadata metadata = org.mockito.Mockito.mock(RecordMetadata.class);
 
-        when(producer.send(eq("2"), any(LibraryEvent.class)))
+        when(producer.send(eq(2), any(LibraryEvent.class)))
                 .thenReturn(CompletableFuture.completedFuture(metadata));
 
         CompletableFuture<RecordMetadata> future = libraryEventService.updateLibraryEvent(event);
 
         assertThat(event.getTimestamp()).isEqualTo(timestamp);
         assertThat(future.join()).isEqualTo(metadata);
-        verify(producer).send(eq("2"), any(LibraryEvent.class));
+        verify(producer).send(eq(2), any(LibraryEvent.class));
     }
 }
-

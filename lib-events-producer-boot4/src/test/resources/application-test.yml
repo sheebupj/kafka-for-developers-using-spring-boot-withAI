@@ -10,7 +10,7 @@ spring:
       retries: 5
       properties:
         enable.idempotence: true
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 management:
@@ -26,4 +26,3 @@ management:
 library:
   events:
     topic: library-events
-

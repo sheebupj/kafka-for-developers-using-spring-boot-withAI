@@ -24,12 +24,12 @@ public class LibraryEventsProducer {
 
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsProducer.class);
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<Integer, Object> kafkaTemplate;
     private final String defaultTopic;
     private final MeterRegistry meterRegistry;
     private final Counter producedCounter;
 
-    public LibraryEventsProducer(KafkaTemplate<String, Object> kafkaTemplate,
+    public LibraryEventsProducer(KafkaTemplate<Integer, Object> kafkaTemplate,
                                  @Value("${library.events.topic}") String defaultTopic,
                                  MeterRegistry meterRegistry) {
         this.kafkaTemplate = kafkaTemplate;
@@ -42,9 +42,9 @@ public class LibraryEventsProducer {
      * Send a library event asynchronously. Returns a CompletableFuture that completes with RecordMetadata on success
      * or completes exceptionally with KafkaPublishException on failure.
      */
-    public CompletableFuture<RecordMetadata> send(String topic, String key, LibraryEvent value) {
+    public CompletableFuture<RecordMetadata> send(String topic, Integer key, LibraryEvent value) {
         String existingCorrelation = MDC.get("correlationId");
-        final String correlationId = (existingCorrelation != null) ? existingCorrelation : key;
+        final String correlationId = (existingCorrelation != null) ? existingCorrelation : String.valueOf(key);
         final boolean correlationIdAdded = existingCorrelation == null;
         if (correlationIdAdded) {
             MDC.put("correlationId", correlationId);
@@ -76,23 +76,23 @@ public class LibraryEventsProducer {
     }
 
     /** convenience overload that uses the configured default topic */
-    public CompletableFuture<RecordMetadata> send(String key, LibraryEvent value) {
+    public CompletableFuture<RecordMetadata> send(Integer key, LibraryEvent value) {
         return send(this.defaultTopic, key, value);
     }
 
     /**
      * Send a library event synchronously and return RecordMetadata on success.
      */
-    public RecordMetadata sendSynchronously(String topic, String key, LibraryEvent value) {
+    public RecordMetadata sendSynchronously(String topic, Integer key, LibraryEvent value) {
         String existingCorrelation = MDC.get("correlationId");
-        final String correlationId = (existingCorrelation != null) ? existingCorrelation : key;
+        final String correlationId = (existingCorrelation != null) ? existingCorrelation : String.valueOf(key);
         final boolean correlationIdAdded = existingCorrelation == null;
         if (correlationIdAdded) {
             MDC.put("correlationId", correlationId);
         }
 
         try {
-            SendResult<String, Object> result = kafkaTemplate.send(topic, key, value).get(10, TimeUnit.SECONDS);
+            SendResult<Integer, Object> result = kafkaTemplate.send(topic, key, value).get(10, TimeUnit.SECONDS);
             RecordMetadata metadata = result.getRecordMetadata();
             log.info("correlationId={} Message sent to topic {} partition {} offset {}", correlationId, topic, metadata.partition(), metadata.offset());
             producedCounter.increment();
@@ -115,7 +115,7 @@ public class LibraryEventsProducer {
     }
 
     /** convenience overload that uses the configured default topic */
-    public RecordMetadata sendSynchronously(String key, LibraryEvent value) {
+    public RecordMetadata sendSynchronously(Integer key, LibraryEvent value) {
         return sendSynchronously(this.defaultTopic, key, value);
     }
 }

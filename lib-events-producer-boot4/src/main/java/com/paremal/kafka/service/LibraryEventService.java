@@ -26,7 +26,7 @@ public class LibraryEventService {
         if (libraryEvent.getTimestamp() == null) {
             libraryEvent.setTimestamp(Instant.now());
         }
-        String key = libraryEvent.getLibraryEventId().toString();
+        Integer key = Math.toIntExact(libraryEvent.getLibraryEventId());
         return producer.send(key, libraryEvent)
                 .whenComplete((md, ex) -> {
                     if (ex != null) {
@@ -45,7 +45,7 @@ public class LibraryEventService {
         if (libraryEvent.getTimestamp() == null) {
             libraryEvent.setTimestamp(Instant.now());
         }
-        String key = libraryEvent.getLibraryEventId().toString();
+        Integer key = Math.toIntExact(libraryEvent.getLibraryEventId());
         return producer.send(key, libraryEvent)
                 .whenComplete((md, ex) -> {
                     if (ex != null) {
