@@ -1,1 +1,16 @@
-spring.application.name=lib-events-consumer-boot4
+server:
+  port: 8181
+
+spring:
+  application:
+    name: lib-events-consumer-boot4
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: library-events-listener-group
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-offset-reset: latest
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.IntegerDeserializer
+        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
