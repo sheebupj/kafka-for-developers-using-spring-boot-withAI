@@ -25,7 +25,7 @@ Task received: draft a Product Requirements Document for the Library Events Prod
 Draft a concise PRD for the Spring Boot 4, Java 25 REST API that publishes library events to Kafka. I will document product goals, user flows, API surface, event schema, Kafka requirements, non-functional needs, and assumptions based on the current Gradle setup and project name, then flag gaps for your confirmation before finalizing.
 
 ### Steps 3–6 steps, 5–20 words each
-1. Inventory existing constraints from `build.gradle` and `application.properties`.
+1. Inventory existing constraints from `build.gradle` and `application.yml`.
 2. Define product goals, personas, and success metrics for publishing events.
 3. Specify API endpoints, request/response contracts, and validation rules.
 4. Describe Kafka topic behavior, event schema, and delivery semantics.
@@ -201,7 +201,7 @@ Here’s a focused implementation plan aligned with `docs/PRD.md`.
    - Add exception handling for validation errors.
 
 3. **Kafka publishing**
-   - Configure Kafka producer properties in `application.properties`.
+   - Configure Kafka producer properties in `application.yml`.
    - Implement `LibraryEventProducer` service using `KafkaTemplate<Long, String>` (or a DTO serializer).
    - Set topic name `library-events`.
    - Use `libraryEventId` as key when present.

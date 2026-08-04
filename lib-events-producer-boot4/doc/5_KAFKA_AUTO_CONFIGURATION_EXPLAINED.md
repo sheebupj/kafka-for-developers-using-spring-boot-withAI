@@ -824,7 +824,7 @@ Spring Boot resolves properties in this order (highest to lowest priority):
 1. Command line arguments: `--spring.kafka.bootstrap-servers=localhost:9092`
 2. Java System properties: `System.setProperty("spring.kafka.bootstrap-servers", "...")`
 3. OS environment variables: `SPRING_KAFKA_BOOTSTRAP_SERVERS=localhost:9092`
-4. `application.yml` or `application.properties` in the application
+4. `application.yml` or `application.yml` in the application
 5. Default values in `@ConfigurationProperties` classes
 
 ---

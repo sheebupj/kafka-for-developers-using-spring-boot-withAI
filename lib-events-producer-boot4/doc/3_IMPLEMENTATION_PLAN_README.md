@@ -25,7 +25,7 @@ This plan translates the PRD into executable engineering steps.
 - Add exception handling for validation errors and server errors.
 
 ## 3. Kafka Publishing
-- Configure Kafka producer properties in `application.properties`.
+- Configure Kafka producer properties in `application.yml`.
 - Implement `LibraryEventProducer` using `KafkaTemplate`.
 - Topic name: `library-events`.
 - Use `libraryEventId` as message key when present.
