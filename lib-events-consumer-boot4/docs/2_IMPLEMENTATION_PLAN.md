@@ -107,7 +107,7 @@ Implement a Kafka consumer for topic `library-events` that:
 > produces a runnable, testable application.
 
 ### Step 1: Kafka Consumer + Configuration ✦ START HERE
-Path: `src/main/java/com/learnkafka/consumer`, `src/main/java/com/learnkafka/config`, `src/main/resources/application.yml`
+Path: `src/main/java/com/paremal/kafka/consumer`, `src/main/java/com/paremal/kafka/config`, `src/main/resources/application.yml`
 
 #### Goal
 Stand up a working Kafka listener that reads raw messages from `library-events` and logs them. No deserialization, no DB — just prove connectivity.
@@ -144,7 +144,7 @@ Stand up a working Kafka listener that reads raw messages from `library-events` 
 ---
 
 ### Step 2: DTO + Deserialization
-Path: `src/main/java/com/learnkafka/dto`
+Path: `src/main/java/com/paremal/kafka/dto`
 
 #### Goal
 Deserialize the raw JSON string received in Step 1 into typed DTO objects. Validate structure. No persistence yet.
@@ -180,7 +180,7 @@ Deserialize the raw JSON string received in Step 1 into typed DTO objects. Valid
 ---
 
 ### Step 3: Kafka Under the Hood
-Path: `docs/3_Kafka_Consumer_Under_the_hood.md`, `src/main/java/com/learnkafka/consumer`, `src/main/java/com/learnkafka/config`
+Path: `docs/3_Kafka_Consumer_Under_the_hood.md`, `src/main/java/com/paremal/kafka/consumer`, `src/main/java/com/paremal/kafka/config`
 
 #### Goal
 Understand how the Spring Kafka consumer works under the hood before adding advanced behavior.
@@ -241,7 +241,7 @@ Decide and implement the right deserializer strategy for this consumer (`JsonDes
 ---
 
 ### Step 5: Consumer Groups and Consumer Offset Management
-Path: `docs/5_CONSUMER_CONCEPTS_HANDS_ON.md`, `src/main/java/com/learnkafka/config`, `src/main/resources/application.yml`, `src/test/resources/application.yml`
+Path: `docs/5_CONSUMER_CONCEPTS_HANDS_ON.md`, `src/main/java/com/paremal/kafka/config`, `src/main/resources/application.yml`, `src/test/resources/application.yml`
 
 #### Goal
 Configure and validate consumer-group behavior and offset management so the consumer is predictable across restarts, failures, and scale-out.
@@ -273,7 +273,7 @@ Configure and validate consumer-group behavior and offset management so the cons
 ---
 
 ### Step 6: Tasks - Business Logic
-Path: `src/main/java/com/learnkafka/service`, `src/main/java/com/learnkafka/dto`, `src/main/java/com/learnkafka/config`, `src/main/resources/db/migration`
+Path: `src/main/java/com/paremal/kafka/service`, `src/main/java/com/paremal/kafka/dto`, `src/main/java/com/paremal/kafka/config`, `src/main/resources/db/migration`
 
 #### Goal
 Add full business logic: `ADD`/`UPDATE` branching, conditional validation, exception classification, and Kafka error handling with retry + DLT. Any schema changes required for new business rules are delivered as new Flyway versioned migrations.
@@ -424,9 +424,9 @@ Create one repository interface per aggregate root. `Book` is owned by `LibraryE
 **`LibraryEventRepository`**
 
 ```java
-package com.learnkafka.repository;
+package com.paremal.kafka.repository;
 
-import com.learnkafka.entity.LibraryEvent;
+import com.paremal.kafka.entity.LibraryEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LibraryEventRepository extends JpaRepository<LibraryEvent, Integer> {
@@ -440,9 +440,9 @@ public interface LibraryEventRepository extends JpaRepository<LibraryEvent, Inte
 **`BookRepository`**
 
 ```java
-package com.learnkafka.repository;
+package com.paremal.kafka.repository;
 
-import com.learnkafka.entity.Book;
+import com.paremal.kafka.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookRepository extends JpaRepository<Book, Integer> {
@@ -488,7 +488,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 ---
 
 ### Step 7: Integration Test to Ensure Save is Working
-Path: `src/test/java/com/learnkafka/consumer`, `src/test/java/com/learnkafka/service`
+Path: `src/test/java/com/paremal/kafka/consumer`, `src/test/java/com/paremal/kafka/service`
 
 #### Goal
 Verify that the save flow works end-to-end and at service level.
@@ -517,7 +517,7 @@ Verify that the save flow works end-to-end and at service level.
 ## 4. Testing Strategy
 
 ### 4.1 Unit Tests
-Path: `src/test/java/com/learnkafka/service`
+Path: `src/test/java/com/paremal/kafka/service`
 
 - `ADD` event → successful insert
 - `UPDATE` event → successful update
@@ -527,7 +527,7 @@ Path: `src/test/java/com/learnkafka/service`
 - Exception classification (retryable vs non-retryable)
 
 ### 4.2 Integration Tests
-Path: `src/test/java/com/learnkafka/consumer`
+Path: `src/test/java/com/paremal/kafka/consumer`
 
 - Consume `ADD` from Kafka → persisted in DB
 - Consume `UPDATE` from Kafka → updated in DB
@@ -535,7 +535,7 @@ Path: `src/test/java/com/learnkafka/consumer`
 - DB transient failure → retry policy triggered
 
 ### 4.3 Repository Tests
-Path: `src/test/java/com/learnkafka/repository`
+Path: `src/test/java/com/paremal/kafka/repository`
 
 - Save `LibraryEvent` with `Book` → both persisted
 - Find by ID → returns correct entity
