@@ -5,7 +5,7 @@ spring:
   application:
     name: lib-events-consumer-boot4
   datasource:
-    url: jdbc:postgresql://${SPRING_DATASOURCE_URL:localhost}:${SPRING_DATASOURCE_PORT:5432}/${SPRING_DATASOURCE_DB:mydatabase}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/mydatabase}
     username: ${SPRING_DATASOURCE_USERNAME:myuser}
     password: ${SPRING_DATASOURCE_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
@@ -27,4 +27,7 @@ spring:
       auto-offset-reset: latest
       properties:
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.IntegerDeserializer
-        spring.deserializer.value.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: com.paremal.kafka.dto.LibraryEventDto
+        spring.json.trusted.packages: com.paremal.kafka.dto

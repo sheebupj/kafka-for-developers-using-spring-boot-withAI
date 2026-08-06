@@ -1,12 +1,12 @@
 package com.paremal.kafka.consumer;
 
+import com.paremal.kafka.dto.LibraryEventDto;
+import com.paremal.kafka.service.LibraryEventService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import com.paremal.kafka.service.LibraryEventService;
-import tools.jackson.core.JacksonException;
 
 @Component
 public class LibraryEventsConsumer {
@@ -19,7 +19,7 @@ public class LibraryEventsConsumer {
     }
 
     @KafkaListener(topics = "library-events")
-    public void onMessage(ConsumerRecord<Integer, String> consumerRecord) throws JacksonException {
+    public void onMessage(ConsumerRecord<Integer, LibraryEventDto> consumerRecord) {
         log.info(
                 "ConsumerRecord received. topic={}, partition={}, offset={}, key={}, value={}",
                 consumerRecord.topic(),

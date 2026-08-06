@@ -1,5 +1,6 @@
 package com.paremal.kafka.config;
 
+import com.paremal.kafka.dto.LibraryEventDto;
 import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +22,9 @@ public class LibraryEventsConsumerConfig {
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsConsumerConfig.class);
 
     @Bean
-    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, String>> kafkaListenerContainerFactory(
-            ConsumerFactory<Integer, String> consumerFactory) {
-        var factory = new ConcurrentKafkaListenerContainerFactory<Integer, String>();
+    KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, LibraryEventDto>> kafkaListenerContainerFactory(
+            ConsumerFactory<Integer, LibraryEventDto> consumerFactory) {
+        var factory = new ConcurrentKafkaListenerContainerFactory<Integer, LibraryEventDto>();
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(defaultErrorHandler());
         return factory;

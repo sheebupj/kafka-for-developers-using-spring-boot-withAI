@@ -1,4 +1,4 @@
-gservices:
+services:
   postgres:
     image: 'postgres:latest'
     environment:
@@ -6,4 +6,4 @@ gservices:
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=myuser'
     ports:
-      - '5432'
+      - '5433:5432'
