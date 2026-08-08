@@ -27,7 +27,7 @@ spring:
       auto-offset-reset: latest
       properties:
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.IntegerDeserializer
-        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.deserializer.value.delegate.class: org.springfr`amework.kafka.support.serializer.JsonDeserializer
         spring.json.use.type.headers: false
         spring.json.value.default.type: com.paremal.kafka.dto.LibraryEventDto
         spring.json.trusted.packages: com.paremal.kafka.dto
