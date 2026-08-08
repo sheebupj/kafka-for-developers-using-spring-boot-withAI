@@ -26,16 +26,19 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+def openApiPort = providers.environmentVariable('SERVER_PORT').orElse('8080').get()
+def openApiBaseUrl = "http://localhost:${openApiPort}"
+
 tasks.register('exportOpenApiJson', Exec) {
 	group = 'documentation'
 	description = 'Exports OpenAPI JSON from a running app to docs/api/openapi.json'
-	commandLine 'curl', '-sS', 'http://localhost:8080/v3/api-docs', '-o', 'docs/api/openapi.json'
+	commandLine 'curl', '-sS', "${openApiBaseUrl}/v3/api-docs", '-o', 'docs/api/openapi.json'
 }
 
 tasks.register('exportOpenApiYaml', Exec) {
 	group = 'documentation'
 	description = 'Exports OpenAPI YAML from a running app to docs/api/openapi.yaml'
-	commandLine 'curl', '-sS', 'http://localhost:8080/v3/api-docs.yaml', '-o', 'docs/api/openapi.yaml'
+	commandLine 'curl', '-sS', "${openApiBaseUrl}/v3/api-docs.yaml", '-o', 'docs/api/openapi.yaml'
 }
 
 tasks.register('exportOpenApiSpec') {

@@ -159,3 +159,5 @@ Stand up a working Kafka listener that reads raw messages from `library-events` 
 - Publishing a test message to `library-events` produces a log line with topic, partition, offset, key, and value.
 - No DB or DTO code is required at this stage.
 go ahead and  implement this step
+
+docker exec -it kafka1 kafka-topics --bootstrap-server kafka1:19092 --create --topic library-events --partitions 3 --replication-factor 3
