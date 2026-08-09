@@ -63,10 +63,10 @@ Consumer Group: library-events-listener-group
 spring:
   kafka:
     consumer:
-      group-id: library-events-listener-group   # ← our consumer group
+      group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:library-events-listener-group}
 ```
 
-All instances of this application that start with this `group-id` form **one consumer group**.
+All instances of this application that start with the same `SPRING_KAFKA_CONSUMER_GROUP_ID` form **one consumer group**.
 
 ### Hands-On: Observe Rebalance
 
@@ -559,4 +559,3 @@ KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, Librar
 | Concurrency | `factory.setConcurrency(n)` | `1` (default, configurable) |
 
 > **Next step:** Proceed to Step 3 of the implementation plan — Domain Model + Repository + DB Persistence.
-
