@@ -24,7 +24,7 @@ spring:
       group-id: ${SPRING_KAFKA_CONSUMER_GROUP_ID:library-events-listener-group}
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-      auto-offset-reset: latest
+      auto-offset-reset: earliest
       properties:
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.IntegerDeserializer
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer

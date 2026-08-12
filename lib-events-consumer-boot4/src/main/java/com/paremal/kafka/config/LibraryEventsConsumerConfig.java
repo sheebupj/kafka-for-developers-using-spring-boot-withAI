@@ -26,6 +26,8 @@ public class LibraryEventsConsumerConfig {
             ConsumerFactory<Integer, LibraryEventDto> consumerFactory) {
         var factory = new ConcurrentKafkaListenerContainerFactory<Integer, LibraryEventDto>();
         factory.setConsumerFactory(consumerFactory);
+       // factory.getContainerProperties().setAckMode(org.springframework.kafka.listener.ContainerProperties.AckMode.MANUAL);
+        factory.setConcurrency(3);
         factory.setCommonErrorHandler(defaultErrorHandler());
         return factory;
     }
