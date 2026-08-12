@@ -1,0 +1,44 @@
+mplemented Step 6 business logic in lib-events-consumer-boot4 with full ADD/UPDATE processing, conditional validation, mapper update support, and Kafka retry/DLT handling.
+Key changes:
+1.Full service implementation in src/main/java/com/paremal/kafka/service/LibraryEventService.java:
+◦
+Branches by eventType (ADD, UPDATE)
+◦
+Enforces conditional rules (UPDATE requires libraryEventId, payload must include book)
+◦
+Uses bean validation and throws deterministic IllegalArgumentException for non-retryable business failures
+◦
+Applies update-not-found policy with descriptive IllegalArgumentException
+
+2.Mapper with update flow in src/main/java/com/paremal/kafka/mapper/LibraryEventMapper.java:
+◦
+Added toEntity(...) and updateEntity(...)
+◦
+Handles nested Book mapping and preserves entity relationship
+
+3.Persistence layer added:
+◦
+Entities: entity/LibraryEvent.java, entity/Book.java (including audit callbacks @PrePersist/@PreUpdate)
+◦
+Repositories: repository/LibraryEventRepository.java, repository/BookRepository.java
+
+4.Kafka error handling upgraded in src/main/java/com/paremal/kafka/config/LibraryEventsConsumerConfig.java:
+◦
+Added DeadLetterPublishingRecoverer routing to <topic>.DLT
+◦
+Added DefaultErrorHandler with backoff/retry
+◦
+Marked deserialization/serialization and IllegalArgumentException as non-retryable
+
+5.Kafka producer settings for DLT publish in src/main/resources/application.yml:
+◦
+Added shared spring.kafka.bootstrap-servers
+◦
+Added producer serializers for key/value
+
+6.Tests updated for new behavior:
+◦
+LibraryEventServiceTest now covers add, update, update-id-required, not-found, null payload, and missing book validation
+◦
+LibraryEventsConsumerTest updated to verify delegation via mock service
+No new Flyway migration was required for this step since the implemented business logic did not introduce new columns/indexes/constraints.
