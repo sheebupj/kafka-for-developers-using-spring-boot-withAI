@@ -46,7 +46,8 @@ public class LibraryEventService {
 
     private void processAddEvent(LibraryEventDto libraryEventDto) {
         var entity = libraryEventMapper.toEntity(libraryEventDto);
-        libraryEventRepository.save(entity);
+        var saved_entity=libraryEventRepository.save(entity);
+        System.out.println(" ");
     }
 
     private void processUpdateEvent(LibraryEventDto libraryEventDto) {

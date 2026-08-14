@@ -692,7 +692,7 @@ spring:
       properties:
         # Use header to store type information
         spring.json.type.mapping: 
-          libraryEvent:com.learnkafka.domain.LibraryEvent
+          libraryEvent:com.paremal.kafka.domain.LibraryEvent
 ```
 
 #### Custom Serializer Example

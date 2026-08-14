@@ -3,7 +3,9 @@ package com.paremal.kafka;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"com.paremal.kafka", "com.learnkafka"})
+import java.util.TimeZone;
+
+@SpringBootApplication(scanBasePackages = {"com.paremal.kafka"})
 public class LibEventsConsumerBoot4Application {
 
 	public static void main(String[] args) {

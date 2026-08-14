@@ -233,7 +233,7 @@ static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:lat
 
 ```bash
 ./gradlew test                           # Run all tests (Docker must be running for Testcontainers)
-./gradlew test --tests "com.learnkafka.service.LibraryEventServiceIntegrationTest"   # Single class
+./gradlew test --tests "com.paremal.kafka.service.LibraryEventServiceIntegrationTest"   # Single class
 ./gradlew test --tests "*.BookControllerIntegrationTest.getBookById*"                 # Single method pattern
 ```
 

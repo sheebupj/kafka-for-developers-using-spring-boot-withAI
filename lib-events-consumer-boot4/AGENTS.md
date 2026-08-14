@@ -19,7 +19,7 @@ Kafka topic "library-events"
 - **DTO/Entity separation** — `dto/` package holds Java records (`LibraryEventDto`, `BookDto`) with bean validation; `domain/` holds JPA entities (`LibraryEvent`, `Book`). `LibraryEventMapper` is the manual static bridge; no MapStruct.
 - **Bidirectional OneToOne** — `LibraryEvent.book` is `mappedBy`, `Book.libraryEvent` owns the FK. On persist, `LibraryEvent` is saved first (to get the IDENTITY-generated ID), then `Book` is saved with the FK set. The `book` field is temporarily nulled to avoid cascade issues. See `LibraryEventService.processEvent()`.
 - **Book PK is producer-provided** (`@Id`, no `@GeneratedValue`); `LibraryEvent` PK is DB-generated (`IDENTITY`).
-- **Kafka deserialization** uses Spring's `JsonDeserializer` with type mapping configured in `application.yml` — the producer sends `com.learnkafka.domain.LibraryEvent` but it's remapped to `com.learnkafka.dto.LibraryEventDto` on this consumer side (`spring.json.type.mapping`).
+- **Kafka deserialization** uses Spring's `JsonDeserializer` with type mapping configured in `application.yml` — the producer sends `com.paremal.kafka.domain.LibraryEvent` but it's remapped to `com.paremal.kafka.dto.LibraryEventDto` on this consumer side (`spring.json.type.mapping`).
 - **BATCH offset commit** — `AckMode.BATCH` in `LibraryEventsConsumerConfig`; Spring Kafka commits offsets automatically after all records in a `poll()` batch are processed. No explicit `Acknowledgment` call needed in the listener.
 
 ## Build & Test Commands

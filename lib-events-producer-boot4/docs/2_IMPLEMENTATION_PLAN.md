@@ -424,9 +424,9 @@ Create one repository interface per aggregate root. `Book` is owned by `LibraryE
 **`LibraryEventRepository`**
 
 ```java
-package com.learnkafka.repository;
+package com.paremal.kafka.repository;
 
-import com.learnkafka.entity.LibraryEvent;
+import com.paremal.kafka.entity.LibraryEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface LibraryEventRepository extends JpaRepository<LibraryEvent, Integer> {
@@ -440,9 +440,9 @@ public interface LibraryEventRepository extends JpaRepository<LibraryEvent, Inte
 **`BookRepository`**
 
 ```java
-package com.learnkafka.repository;
+package com.paremal.kafka.repository;
 
-import com.learnkafka.entity.Book;
+import com.paremal.kafka.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookRepository extends JpaRepository<Book, Integer> {

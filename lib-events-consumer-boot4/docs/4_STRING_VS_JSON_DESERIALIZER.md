@@ -68,16 +68,16 @@ spring:
     consumer:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: com.learnkafka.dto,com.learnkafka.domain
-        spring.json.value.default.type: com.learnkafka.dto.LibraryEventDto
-        spring.json.type.mapping: com.learnkafka.domain.LibraryEvent:com.learnkafka.dto.LibraryEventDto
+        spring.json.trusted.packages: com.paremal.kafka.dto,com.paremal.kafka.domain
+        spring.json.value.default.type: com.paremal.kafka.dto.LibraryEventDto
+        spring.json.type.mapping: com.paremal.kafka.domain.LibraryEvent:com.paremal.kafka.dto.LibraryEventDto
 ```
 
 | Property | Purpose |
 |---|---|
 | `spring.json.trusted.packages` | Security: only allow deserialization of classes from these packages. Prevents arbitrary class instantiation. |
 | `spring.json.value.default.type` | Fallback: if no type header is present in the Kafka message, deserialize into this class. |
-| `spring.json.type.mapping` | Mapping: when the producer's type header says `com.learnkafka.domain.LibraryEvent`, map it to the consumer's `com.learnkafka.dto.LibraryEventDto`. |
+| `spring.json.type.mapping` | Mapping: when the producer's type header says `com.paremal.kafka.domain.LibraryEvent`, map it to the consumer's `com.paremal.kafka.dto.LibraryEventDto`. |
 
 ### When to use
 - You want **zero manual parsing** — Kafka delivers typed objects.
@@ -163,5 +163,5 @@ For this project we use **`JsonDeserializer`** because:
 1. The producer sends a consistent `LibraryEvent` JSON structure.
 2. We want deserialization errors to be caught by the Kafka error handler (retry + DLT pipeline).
 3. It eliminates boilerplate — the listener receives a typed `LibraryEventDto` directly.
-4. Type mapping (`com.learnkafka.domain.LibraryEvent` → `com.learnkafka.dto.LibraryEventDto`) cleanly decouples the producer's domain model from the consumer's DTO.
+4. Type mapping (`com.paremal.kafka.domain.LibraryEvent` → `com.paremal.kafka.dto.LibraryEventDto`) cleanly decouples the producer's domain model from the consumer's DTO.
 

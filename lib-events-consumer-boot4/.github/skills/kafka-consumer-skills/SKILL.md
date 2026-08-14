@@ -35,32 +35,32 @@ When adding a new Kafka consumer for topic `{topic-name}` processing `{Entity}` 
 
 | # | File                                | Package / Path                              | Purpose                                                  |
 |---|-------------------------------------|---------------------------------------------|----------------------------------------------------------|
-| 1 | `{Entity}Dto.java`                  | `com.learnkafka.dto`                        | Inbound DTO — Java `record` with bean-validation         |
-| 2 | Domain entity (if new)              | `com.learnkafka.domain`                     | JPA entity with audit callbacks                          |
-| 3 | Mapper method(s)                    | `com.learnkafka.dto.LibraryEventMapper`     | Static `toEntity(dto)` conversion                        |
-| 4 | `{Entity}Repository.java`           | `com.learnkafka.repository`                 | `JpaRepository<{Entity}, {IdType}>`                      |
-| 5 | `{Entity}Service.java`              | `com.learnkafka.service`                    | `processEvent(ConsumerRecord<K, V>)` — `@Transactional`  |
-| 6 | `{Topic}Consumer.java`              | `com.learnkafka.consumer`                   | `@KafkaListener` + MANUAL ack                            |
-| 7 | Consumer config (if custom)         | `com.learnkafka.config`                     | `ConcurrentKafkaListenerContainerFactory` bean            |
+| 1 | `{Entity}Dto.java`                  | `com.paremal.kafka.dto`                        | Inbound DTO — Java `record` with bean-validation         |
+| 2 | Domain entity (if new)              | `com.paremal.kafka.domain`                     | JPA entity with audit callbacks                          |
+| 3 | Mapper method(s)                    | `com.paremal.kafka.dto.LibraryEventMapper`     | Static `toEntity(dto)` conversion                        |
+| 4 | `{Entity}Repository.java`           | `com.paremal.kafka.repository`                 | `JpaRepository<{Entity}, {IdType}>`                      |
+| 5 | `{Entity}Service.java`              | `com.paremal.kafka.service`                    | `processEvent(ConsumerRecord<K, V>)` — `@Transactional`  |
+| 6 | `{Topic}Consumer.java`              | `com.paremal.kafka.consumer`                   | `@KafkaListener` + MANUAL ack                            |
+| 7 | Consumer config (if custom)         | `com.paremal.kafka.config`                     | `ConcurrentKafkaListenerContainerFactory` bean            |
 | 8 | `application.yml` entries           | `src/main/resources/application.yml`        | Consumer group, deserializer, type mapping                |
 | 9 | Flyway migration (if new table)     | `src/main/resources/db/migration/V{N}__...` | DDL                                                      |
-| 10 | `{Topic}ConsumerIntegrationTest.java` | `com.learnkafka.consumer` (test)          | End-to-end: Embedded Kafka → Consumer → DB assertions    |
-| 11 | `{Entity}ServiceIntegrationTest.java` | `com.learnkafka.service` (test)           | Service-only: bypass Kafka, call `processEvent()` directly |
+| 10 | `{Topic}ConsumerIntegrationTest.java` | `com.paremal.kafka.consumer` (test)          | End-to-end: Embedded Kafka → Consumer → DB assertions    |
+| 11 | `{Entity}ServiceIntegrationTest.java` | `com.paremal.kafka.service` (test)           | Service-only: bypass Kafka, call `processEvent()` directly |
 
 ---
 
 ## 1. Inbound DTO — `{Entity}Dto.java`
 
-- Java `record` in `com.learnkafka.dto`.
+- Java `record` in `com.paremal.kafka.dto`.
 - Annotate with `@NotNull`, `@NotBlank`, `@Valid` (for nested records).
 - This is what the `JsonDeserializer` produces on the consumer side.
 
 ### Reference — `LibraryEventDto.java`
 
 ```java
-package com.learnkafka.dto;
+package com.paremal.kafka.dto;
 
-import com.learnkafka.domain.LibraryEventType;
+import com.paremal.kafka.domain.LibraryEventType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -93,10 +93,10 @@ public record LibraryEventDto(
 ### Template
 
 ```java
-package com.learnkafka.consumer;
+package com.paremal.kafka.consumer;
 
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.service.{Entity}Service;
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.service.{Entity}Service;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,9 +169,9 @@ Only create a new config class if the new consumer requires a **different** cont
 ### Template
 
 ```java
-package com.learnkafka.config;
+package com.paremal.kafka.config;
 
-import com.learnkafka.dto.{Entity}Dto;
+import com.paremal.kafka.dto.{Entity}Dto;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -233,14 +233,14 @@ public class LibraryEventsConsumerConfig {
 ### Template
 
 ```java
-package com.learnkafka.service;
+package com.paremal.kafka.service;
 
-import com.learnkafka.domain.{ChildEntity};
-import com.learnkafka.domain.{ParentEntity};
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.dto.LibraryEventMapper;
-import com.learnkafka.repository.{ChildEntity}Repository;
-import com.learnkafka.repository.{ParentEntity}Repository;
+import com.paremal.kafka.domain.{ChildEntity};
+import com.paremal.kafka.domain.{ParentEntity};
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.dto.LibraryEventMapper;
+import com.paremal.kafka.repository.{ChildEntity}Repository;
+import com.paremal.kafka.repository.{ParentEntity}Repository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -341,10 +341,10 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: com.learnkafka.dto,com.learnkafka.domain
-        spring.json.value.default.type: com.learnkafka.dto.{Entity}Dto
+        spring.json.trusted.packages: com.paremal.kafka.dto,com.paremal.kafka.domain
+        spring.json.value.default.type: com.paremal.kafka.dto.{Entity}Dto
         # Remap producer type to consumer DTO type (if producer sends a different class name)
-        spring.json.type.mapping: {producer.fully.qualified.Class}:com.learnkafka.dto.{Entity}Dto
+        spring.json.type.mapping: {producer.fully.qualified.Class}:com.paremal.kafka.dto.{Entity}Dto
 ```
 
 ### Key Properties Explained
@@ -412,13 +412,13 @@ End-to-end test: produce a message to an **Embedded Kafka** topic → the `@Kafk
 ### Required Imports
 
 ```java
-import com.learnkafka.domain.Book;
-import com.learnkafka.domain.LibraryEvent;
-import com.learnkafka.domain.LibraryEventType;
-import com.learnkafka.dto.BookDto;
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.repository.BookRepository;
-import com.learnkafka.repository.LibraryEventRepository;
+import com.paremal.kafka.domain.Book;
+import com.paremal.kafka.domain.LibraryEvent;
+import com.paremal.kafka.domain.LibraryEventType;
+import com.paremal.kafka.dto.BookDto;
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.repository.BookRepository;
+import com.paremal.kafka.repository.LibraryEventRepository;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -505,15 +505,15 @@ Every consumer integration-test class **must** include these test cases at minim
 ### Full Template
 
 ```java
-package com.learnkafka.consumer;
+package com.paremal.kafka.consumer;
 
-import com.learnkafka.domain.{ChildEntity};
-import com.learnkafka.domain.{ParentEntity};
-import com.learnkafka.domain.{EventTypeEnum};
-import com.learnkafka.dto.{ChildDto};
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.repository.{ChildEntity}Repository;
-import com.learnkafka.repository.{ParentEntity}Repository;
+import com.paremal.kafka.domain.{ChildEntity};
+import com.paremal.kafka.domain.{ParentEntity};
+import com.paremal.kafka.domain.{EventTypeEnum};
+import com.paremal.kafka.dto.{ChildDto};
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.repository.{ChildEntity}Repository;
+import com.paremal.kafka.repository.{ParentEntity}Repository;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.junit.jupiter.api.BeforeEach;
@@ -805,15 +805,15 @@ private ConsumerRecord<Integer, {Entity}Dto> buildConsumerRecord(Integer key, {E
 ### Full Template
 
 ```java
-package com.learnkafka.service;
+package com.paremal.kafka.service;
 
-import com.learnkafka.domain.{ChildEntity};
-import com.learnkafka.domain.{ParentEntity};
-import com.learnkafka.domain.{EventTypeEnum};
-import com.learnkafka.dto.{ChildDto};
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.repository.{ChildEntity}Repository;
-import com.learnkafka.repository.{ParentEntity}Repository;
+import com.paremal.kafka.domain.{ChildEntity};
+import com.paremal.kafka.domain.{ParentEntity};
+import com.paremal.kafka.domain.{EventTypeEnum};
+import com.paremal.kafka.dto.{ChildDto};
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.repository.{ChildEntity}Repository;
+import com.paremal.kafka.repository.{ParentEntity}Repository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

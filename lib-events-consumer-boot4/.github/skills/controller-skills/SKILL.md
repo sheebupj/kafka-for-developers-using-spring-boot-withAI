@@ -33,27 +33,27 @@ When adding a new controller for entity `{Entity}`, create **all** of the follow
 
 | # | File | Package / Path | Purpose |
 |---|------|----------------|---------|
-| 1 | `{Entity}Dto.java` | `com.learnkafka.dto` | Request DTO — Java `record` with bean-validation annotations |
-| 2 | `{Entity}ResponseDto.java` | `com.learnkafka.dto` | Response DTO — Java `record`, includes audit fields + any FK IDs |
-| 3 | Mapper method(s) in `LibraryEventMapper.java` | `com.learnkafka.dto` | Static `to{Entity}Entity(dto)` and `to{Entity}ResponseDto(entity)` methods |
-| 4 | `{Entity}Repository.java` | `com.learnkafka.repository` | `JpaRepository<{Entity}, {IdType}>` |
-| 5 | `{Entity}Service.java` | `com.learnkafka.service` | Business logic — `findAll`, `findById`, `create`, `update`, `delete` |
-| 6 | `{Entity}Controller.java` | `com.learnkafka.controller` | REST endpoints under `/v1/{entities}` |
+| 1 | `{Entity}Dto.java` | `com.paremal.kafka.dto` | Request DTO — Java `record` with bean-validation annotations |
+| 2 | `{Entity}ResponseDto.java` | `com.paremal.kafka.dto` | Response DTO — Java `record`, includes audit fields + any FK IDs |
+| 3 | Mapper method(s) in `LibraryEventMapper.java` | `com.paremal.kafka.dto` | Static `to{Entity}Entity(dto)` and `to{Entity}ResponseDto(entity)` methods |
+| 4 | `{Entity}Repository.java` | `com.paremal.kafka.repository` | `JpaRepository<{Entity}, {IdType}>` |
+| 5 | `{Entity}Service.java` | `com.paremal.kafka.service` | Business logic — `findAll`, `findById`, `create`, `update`, `delete` |
+| 6 | `{Entity}Controller.java` | `com.paremal.kafka.controller` | REST endpoints under `/v1/{entities}` |
 | 7 | Flyway migration | `src/main/resources/db/migration/V{N}__create_{entity}.sql` | DDL for the new table |
-| 8 | `{Entity}ControllerIntegrationTest.java` | `com.learnkafka.controller` (test) | Full integration-test class |
+| 8 | `{Entity}ControllerIntegrationTest.java` | `com.paremal.kafka.controller` (test) | Full integration-test class |
 
 ---
 
 ## 1. Request DTO — `{Entity}Dto.java`
 
-- Java `record` in `com.learnkafka.dto`.
+- Java `record` in `com.paremal.kafka.dto`.
 - Annotate fields with `@NotNull`, `@NotBlank`, etc. from `jakarta.validation.constraints`.
 - No audit fields — those are entity-only.
 
 ### Template
 
 ```java
-package com.learnkafka.dto;
+package com.paremal.kafka.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -85,13 +85,13 @@ public record BookDto(
 
 ## 2. Response DTO — `{Entity}ResponseDto.java`
 
-- Java `record` in `com.learnkafka.dto`.
+- Java `record` in `com.paremal.kafka.dto`.
 - Includes all fields the client should see: entity fields + FK IDs + `createdAt` / `updatedAt`.
 
 ### Template
 
 ```java
-package com.learnkafka.dto;
+package com.paremal.kafka.dto;
 
 import java.time.LocalDateTime;
 
@@ -140,9 +140,9 @@ public static {Entity}ResponseDto to{Entity}ResponseDto({Entity} entity) {
 ## 4. Repository — `{Entity}Repository.java`
 
 ```java
-package com.learnkafka.repository;
+package com.paremal.kafka.repository;
 
-import com.learnkafka.domain.{Entity};
+import com.paremal.kafka.domain.{Entity};
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface {Entity}Repository extends JpaRepository<{Entity}, {IdType}> {
@@ -164,13 +164,13 @@ public interface {Entity}Repository extends JpaRepository<{Entity}, {IdType}> {
 ### Template
 
 ```java
-package com.learnkafka.service;
+package com.paremal.kafka.service;
 
-import com.learnkafka.domain.{Entity};
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.dto.{Entity}ResponseDto;
-import com.learnkafka.dto.LibraryEventMapper;
-import com.learnkafka.repository.{Entity}Repository;
+import com.paremal.kafka.domain.{Entity};
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.dto.{Entity}ResponseDto;
+import com.paremal.kafka.dto.LibraryEventMapper;
+import com.paremal.kafka.repository.{Entity}Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -266,11 +266,11 @@ public class {Entity}Service {
 ### Template
 
 ```java
-package com.learnkafka.controller;
+package com.paremal.kafka.controller;
 
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.dto.{Entity}ResponseDto;
-import com.learnkafka.service.{Entity}Service;
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.dto.{Entity}ResponseDto;
+import com.paremal.kafka.service.{Entity}Service;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -423,12 +423,12 @@ CREATE TABLE {entity} (
 ### Required Imports
 
 ```java
-import com.learnkafka.domain.{Entity};
-import com.learnkafka.domain.LibraryEvent;
-import com.learnkafka.domain.LibraryEventType;
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.repository.{Entity}Repository;
-import com.learnkafka.repository.LibraryEventRepository;
+import com.paremal.kafka.domain.{Entity};
+import com.paremal.kafka.domain.LibraryEvent;
+import com.paremal.kafka.domain.LibraryEventType;
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.repository.{Entity}Repository;
+import com.paremal.kafka.repository.LibraryEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -480,14 +480,14 @@ private void persistEntityWithLibraryEvent({IdType} {entityId}, String {field1},
 ### Full Template
 
 ```java
-package com.learnkafka.controller;
+package com.paremal.kafka.controller;
 
-import com.learnkafka.domain.{Entity};
-import com.learnkafka.domain.LibraryEvent;
-import com.learnkafka.domain.LibraryEventType;
-import com.learnkafka.dto.{Entity}Dto;
-import com.learnkafka.repository.{Entity}Repository;
-import com.learnkafka.repository.LibraryEventRepository;
+import com.paremal.kafka.domain.{Entity};
+import com.paremal.kafka.domain.LibraryEvent;
+import com.paremal.kafka.domain.LibraryEventType;
+import com.paremal.kafka.dto.{Entity}Dto;
+import com.paremal.kafka.repository.{Entity}Repository;
+import com.paremal.kafka.repository.LibraryEventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

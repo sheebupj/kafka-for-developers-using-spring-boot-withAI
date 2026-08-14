@@ -157,9 +157,9 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: latest
       properties:
-        spring.json.trusted.packages: com.learnkafka.dto,com.learnkafka.domain
-        spring.json.value.default.type: com.learnkafka.dto.LibraryEventDto
-        spring.json.type.mapping: com.learnkafka.domain.LibraryEvent:com.learnkafka.dto.LibraryEventDto
+        spring.json.trusted.packages: com.paremal.kafka.dto,com.paremal.kafka.domain
+        spring.json.value.default.type: com.paremal.kafka.dto.LibraryEventDto
+        spring.json.type.mapping: com.paremal.kafka.domain.LibraryEvent:com.paremal.kafka.dto.LibraryEventDto
 ```
 
 ### Key differences from `main/resources/application.yml`
@@ -177,7 +177,7 @@ spring:
 ## Test Class Setup — Anatomy of an Integration Test
 
 ```java
-package com.learnkafka.service;
+package com.paremal.kafka.service;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;      // ① Replaces @Testcontainers
@@ -476,7 +476,7 @@ spring:
 ### Test class skeleton
 
 ```java
-package com.learnkafka.service;
+package com.paremal.kafka.service;
 
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
@@ -503,7 +503,7 @@ class MyIntegrationTest {
 ```bash
 ./gradlew test
 # or run a specific test class
-./gradlew test --tests "com.learnkafka.service.LibraryEventServiceIntegrationTest"
+./gradlew test --tests "com.paremal.kafka.service.LibraryEventServiceIntegrationTest"
 ```
 
 ### Prerequisites
