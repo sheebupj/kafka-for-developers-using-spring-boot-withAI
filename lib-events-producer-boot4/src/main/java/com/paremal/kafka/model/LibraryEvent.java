@@ -1,25 +1,31 @@
 package com.paremal.kafka.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.time.Instant;
 
+@Schema(description = "Represents a library event to be published to Kafka")
 public class LibraryEvent {
 
+    @Schema(description = "Unique identifier of the library event", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "libraryEventId is required")
     @Positive(message = "libraryEventId must be a positive number")
     private Long libraryEventId;
 
+    @Schema(description = "Type of library event", example = "ADD", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "eventType is required")
     private EventType eventType;
 
+    @Schema(description = "Book details associated with the event", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "book is required")
     @Valid
     private Book book;
 
+    @Schema(description = "Event timestamp (ISO-8601)", example = "2025-01-01T00:00:00Z", accessMode = Schema.AccessMode.READ_ONLY)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Instant timestamp;
 

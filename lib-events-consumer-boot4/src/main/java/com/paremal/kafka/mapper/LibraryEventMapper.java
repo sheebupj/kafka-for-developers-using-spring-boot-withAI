@@ -3,6 +3,7 @@ package com.paremal.kafka.mapper;
 import com.paremal.kafka.dto.BookDto;
 import com.paremal.kafka.dto.BookResponseDto;
 import com.paremal.kafka.dto.LibraryEventDto;
+import com.paremal.kafka.dto.LibraryEventResponseDto;
 import com.paremal.kafka.entity.Book;
 import com.paremal.kafka.entity.LibraryEvent;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,18 @@ public class LibraryEventMapper {
                 libraryEventId,
                 book.getCreatedAt(),
                 book.getUpdatedAt()
+        );
+    }
+    public LibraryEventResponseDto toLibraryEventResponseDto(LibraryEvent libraryEvent) {
+        BookResponseDto book = libraryEvent.getBook() != null
+                ? toBookResponseDto(libraryEvent.getBook())
+                : null;
+        return new LibraryEventResponseDto(
+                libraryEvent.getLibraryEventId(),
+                libraryEvent.getEventType(),
+                book,
+                libraryEvent.getCreatedAt(),
+                libraryEvent.getUpdatedAt()
         );
     }
 

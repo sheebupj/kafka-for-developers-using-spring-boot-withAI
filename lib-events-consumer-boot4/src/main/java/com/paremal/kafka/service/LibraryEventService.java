@@ -1,6 +1,7 @@
 package com.paremal.kafka.service;
 
 import com.paremal.kafka.dto.LibraryEventDto;
+import com.paremal.kafka.dto.LibraryEventResponseDto;
 import com.paremal.kafka.mapper.LibraryEventMapper;
 import com.paremal.kafka.repository.LibraryEventRepository;
 import jakarta.validation.ConstraintViolation;
@@ -10,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,6 +63,18 @@ public class LibraryEventService {
                         "LibraryEvent not found for libraryEventId=%d".formatted(libraryEventDto.libraryEventId())));
         libraryEventMapper.updateEntity(libraryEventDto, existingEvent);
         libraryEventRepository.save(existingEvent);
+    }
+    public List<LibraryEventResponseDto> findAll() {
+        log.info("Fetching all library events");
+        return libraryEventRepository.findAll()
+                .stream()
+                .map(libraryEventMapper::toLibraryEventResponseDto)
+                .toList();
+    }
+    public Optional<LibraryEventResponseDto> findById(Integer libraryEventId) {
+        log.info("Fetching library event with id: {}", libraryEventId);
+        return libraryEventRepository.findById(libraryEventId)
+                .map(libraryEventMapper::toLibraryEventResponseDto);
     }
 
     private void validateEvent(LibraryEventDto libraryEventDto) {

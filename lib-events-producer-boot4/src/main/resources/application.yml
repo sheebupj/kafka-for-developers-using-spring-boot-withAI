@@ -35,3 +35,6 @@ springdoc:
     doc-expansion: none
     operations-sorter: method
     tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
+    display-request-duration: true
