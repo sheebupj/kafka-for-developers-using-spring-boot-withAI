@@ -1,6 +1,7 @@
 package com.paremal.kafka.mapper;
 
 import com.paremal.kafka.dto.BookDto;
+import com.paremal.kafka.dto.BookResponseDto;
 import com.paremal.kafka.dto.LibraryEventDto;
 import com.paremal.kafka.entity.Book;
 import com.paremal.kafka.entity.LibraryEvent;
@@ -8,6 +9,32 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LibraryEventMapper {
+
+    // ── Book ↔ REST layer ────────────────────────────────────────────────────
+
+    public static BookResponseDto toBookResponseDto(Book book) {
+        Integer libraryEventId = book.getLibraryEvent() != null
+                ? book.getLibraryEvent().getLibraryEventId()
+                : null;
+        return new BookResponseDto(
+                book.getBookId(),
+                book.getBookName(),
+                book.getBookAuthor(),
+                libraryEventId,
+                book.getCreatedAt(),
+                book.getUpdatedAt()
+        );
+    }
+
+    public static Book toBookEntity(BookDto dto) {
+        Book book = new Book();
+        book.setBookId(dto.bookId());
+        book.setBookName(dto.bookName());
+        book.setBookAuthor(dto.bookAuthor());
+        return book;
+    }
+
+    // ── Kafka consumer path ──────────────────────────────────────────────────
 
     public LibraryEvent toEntity(LibraryEventDto dto) {
         var libraryEvent = new LibraryEvent();

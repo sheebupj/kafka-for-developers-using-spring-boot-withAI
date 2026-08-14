@@ -14,6 +14,15 @@ import java.time.LocalDateTime;
 @Table(name = "book")
 public class Book {
 
+    public Book() {
+    }
+
+    public Book(Integer bookId, String bookName, String bookAuthor) {
+        this.bookId = bookId;
+        this.bookName = bookName;
+        this.bookAuthor = bookAuthor;
+    }
+
     @Id
     @Column(name = "book_id")
     private Integer bookId;

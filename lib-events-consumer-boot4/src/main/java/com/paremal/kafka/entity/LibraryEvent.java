@@ -19,6 +19,18 @@ import java.time.LocalDateTime;
 @Table(name = "library_event")
 public class LibraryEvent {
 
+    public LibraryEvent() {
+    }
+
+    public LibraryEvent(Integer libraryEventId, EventType eventType, Book book) {
+        this.libraryEventId = libraryEventId;
+        this.eventType = eventType;
+        this.book = book;
+        if (book != null) {
+            book.setLibraryEvent(this);
+        }
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "library_event_id")
