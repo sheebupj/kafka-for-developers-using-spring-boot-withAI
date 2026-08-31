@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Service layer for processing Kafka library events and exposing read operations.
+ */
 @Service
 public class LibraryEventService {
 
@@ -23,6 +26,9 @@ public class LibraryEventService {
     private final LibraryEventMapper libraryEventMapper;
     private final Validator validator;
 
+    /**
+     * Creates the service with its required repository, mapper, and validator dependencies.
+     */
     public LibraryEventService(
             LibraryEventRepository libraryEventRepository,
             LibraryEventMapper libraryEventMapper,
@@ -32,6 +38,10 @@ public class LibraryEventService {
         this.validator = validator;
     }
 
+    /**
+     * Validates and dispatches an incoming Kafka record to ADD or UPDATE processing.
+     * Throws {@link IllegalArgumentException} when the payload is null or invalid.
+     */
     public void processEvent(ConsumerRecord<Integer, LibraryEventDto> consumerRecord) {
         var libraryEventDto = consumerRecord.value();
         if (libraryEventDto == null) {
@@ -47,12 +57,18 @@ public class LibraryEventService {
         }
     }
 
+    /**
+     * Persists a new {@link com.paremal.kafka.entity.LibraryEvent} from an ADD event payload.
+     */
     private void processAddEvent(LibraryEventDto libraryEventDto) {
         var entity = libraryEventMapper.toEntity(libraryEventDto);
-        var saved_entity=libraryEventRepository.save(entity);
-        System.out.println(" ");
+        libraryEventRepository.save(entity);
     }
 
+    /**
+     * Updates an existing {@link com.paremal.kafka.entity.LibraryEvent} from an UPDATE event payload.
+     * Throws {@link IllegalArgumentException} when the ID is missing or the record does not exist.
+     */
     private void processUpdateEvent(LibraryEventDto libraryEventDto) {
         if (libraryEventDto.libraryEventId() == null) {
             throw new IllegalArgumentException("libraryEventId is required for UPDATE events");
@@ -64,6 +80,9 @@ public class LibraryEventService {
         libraryEventMapper.updateEntity(libraryEventDto, existingEvent);
         libraryEventRepository.save(existingEvent);
     }
+    /**
+     * Returns all library events as response DTOs.
+     */
     public List<LibraryEventResponseDto> findAll() {
         log.info("Fetching all library events");
         return libraryEventRepository.findAll()
@@ -71,12 +90,19 @@ public class LibraryEventService {
                 .map(libraryEventMapper::toLibraryEventResponseDto)
                 .toList();
     }
+    /**
+     * Returns a single library event by ID, or empty when not found.
+     */
     public Optional<LibraryEventResponseDto> findById(Integer libraryEventId) {
         log.info("Fetching library event with id: {}", libraryEventId);
         return libraryEventRepository.findById(libraryEventId)
                 .map(libraryEventMapper::toLibraryEventResponseDto);
     }
 
+    /**
+     * Validates the event DTO against bean-validation constraints.
+     * Throws {@link IllegalArgumentException} listing all violations when invalid.
+     */
     private void validateEvent(LibraryEventDto libraryEventDto) {
         var violations = validator.validate(libraryEventDto);
         if (!violations.isEmpty()) {
@@ -84,6 +110,9 @@ public class LibraryEventService {
         }
     }
 
+    /**
+     * Formats constraint violations into a single human-readable error message.
+     */
     private String violationMessage(Iterable<ConstraintViolation<LibraryEventDto>> violations) {
         return "Validation failed: " + java.util.stream.StreamSupport.stream(violations.spliterator(), false)
                 .map(violation -> "%s %s".formatted(violation.getPropertyPath(), violation.getMessage()))

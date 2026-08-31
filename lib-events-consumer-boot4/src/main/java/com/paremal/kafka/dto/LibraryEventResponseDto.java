@@ -6,6 +6,9 @@ import com.paremal.kafka.domain.EventType;
 
 import java.time.LocalDateTime;
 
+/**
+ * Response DTO representing library event details exposed by REST APIs.
+ */
 public record LibraryEventResponseDto(
         Integer libraryEventId,
         EventType eventType,
@@ -14,4 +17,3 @@ public record LibraryEventResponseDto(
         LocalDateTime updatedAt
 ) {
 }
-

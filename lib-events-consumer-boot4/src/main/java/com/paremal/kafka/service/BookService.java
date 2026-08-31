@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service layer for CRUD operations on books.
+ */
 @Service
 public class BookService {
 
@@ -20,10 +23,16 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
+    /**
+     * Creates the service with the required book repository dependency.
+     */
     public BookService(BookRepository bookRepository) {
         this.bookRepository = bookRepository;
     }
 
+    /**
+     * Returns all books as response DTOs.
+     */
     public List<BookResponseDto> findAll() {
         log.info("Fetching all books");
         return bookRepository.findAll()
@@ -32,12 +41,18 @@ public class BookService {
                 .toList();
     }
 
+    /**
+     * Returns a single book by ID, or empty when not found.
+     */
     public Optional<BookResponseDto> findById(Integer bookId) {
         log.info("Fetching book with id: {}", bookId);
         return bookRepository.findById(bookId)
                 .map(LibraryEventMapper::toBookResponseDto);
     }
 
+    /**
+     * Creates a new book from the given DTO and returns the saved result.
+     */
     @Transactional
     public BookResponseDto create(BookDto bookDto) {
         log.info("Creating book: {}", bookDto);
@@ -47,6 +62,9 @@ public class BookService {
         return LibraryEventMapper.toBookResponseDto(saved);
     }
 
+    /**
+     * Updates an existing book by ID and returns empty when the book is missing.
+     */
     @Transactional
     public Optional<BookResponseDto> update(Integer bookId, BookDto bookDto) {
         log.info("Updating book with id: {}", bookId);
@@ -60,6 +78,9 @@ public class BookService {
                 });
     }
 
+    /**
+     * Deletes a book by ID and returns whether a record was deleted.
+     */
     @Transactional
     public boolean delete(Integer bookId) {
         log.info("Deleting book with id: {}", bookId);

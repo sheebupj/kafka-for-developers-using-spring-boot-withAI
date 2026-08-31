@@ -18,12 +18,19 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.DeserializationException;
 import org.springframework.util.backoff.FixedBackOff;
 
+/**
+ * Kafka consumer configuration for listener containers and error recovery behavior.
+ */
 @Configuration
 @EnableKafka
 public class LibraryEventsConsumerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsConsumerConfig.class);
 
+    /**
+     * Creates the Kafka listener container factory with consumer settings,
+     * concurrency, and shared error handling.
+     */
     @Bean
     KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<Integer, LibraryEventDto>> kafkaListenerContainerFactory(
            ConsumerFactory<Integer, LibraryEventDto> consumerFactory,
@@ -36,6 +43,10 @@ public class LibraryEventsConsumerConfig {
        return factory;
     }
 
+    /**
+     * Routes failed records to the dead-letter topic using the same partition
+     * as the original record.
+     */
     @Bean
     DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaOperations<Object, Object> kafkaTemplate) {
        return new DeadLetterPublishingRecoverer(
@@ -43,6 +54,9 @@ public class LibraryEventsConsumerConfig {
                (consumerRecord, exception) -> new TopicPartition(consumerRecord.topic() + ".DLT", consumerRecord.partition()));
     }
 
+    /**
+     * Configures retry and recovery behavior for listener failures.
+     */
     @Bean
     DefaultErrorHandler defaultErrorHandler(DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
        var errorHandler = new DefaultErrorHandler(

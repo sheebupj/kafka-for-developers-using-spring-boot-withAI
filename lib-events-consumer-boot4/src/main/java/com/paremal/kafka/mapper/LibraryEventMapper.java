@@ -8,11 +8,17 @@ import com.paremal.kafka.entity.Book;
 import com.paremal.kafka.entity.LibraryEvent;
 import org.springframework.stereotype.Component;
 
+/**
+ * Maps library event and book objects between DTO and entity layers.
+ */
 @Component
 public class LibraryEventMapper {
 
     // ── Book ↔ REST layer ────────────────────────────────────────────────────
 
+    /**
+     * Converts a {@link Book} entity to a REST response DTO.
+     */
     public static BookResponseDto toBookResponseDto(Book book) {
         Integer libraryEventId = book.getLibraryEvent() != null
                 ? book.getLibraryEvent().getLibraryEventId()
@@ -26,6 +32,9 @@ public class LibraryEventMapper {
                 book.getUpdatedAt()
         );
     }
+    /**
+     * Converts a {@link LibraryEvent} entity to a REST response DTO.
+     */
     public LibraryEventResponseDto toLibraryEventResponseDto(LibraryEvent libraryEvent) {
         BookResponseDto book = libraryEvent.getBook() != null
                 ? toBookResponseDto(libraryEvent.getBook())
@@ -39,6 +48,9 @@ public class LibraryEventMapper {
         );
     }
 
+    /**
+     * Converts an incoming {@link BookDto} to a {@link Book} entity.
+     */
     public static Book toBookEntity(BookDto dto) {
         Book book = new Book();
         book.setBookId(dto.bookId());
@@ -49,6 +61,9 @@ public class LibraryEventMapper {
 
     // ── Kafka consumer path ──────────────────────────────────────────────────
 
+    /**
+     * Creates a new {@link LibraryEvent} entity from a Kafka payload DTO.
+     */
     public LibraryEvent toEntity(LibraryEventDto dto) {
         var libraryEvent = new LibraryEvent();
         libraryEvent.setEventType(dto.eventType());
@@ -61,6 +76,10 @@ public class LibraryEventMapper {
         return libraryEvent;
     }
 
+    /**
+     * Updates an existing {@link LibraryEvent} from an incoming DTO.
+     * Rejects updates where the book ID changes for the same event.
+     */
     public void updateEntity(LibraryEventDto dto, LibraryEvent existing) {
         existing.setEventType(dto.eventType());
 
@@ -78,6 +97,9 @@ public class LibraryEventMapper {
         mapBook(dto.book(), existingBook);
     }
 
+    /**
+     * Copies book fields from DTO to entity.
+     */
     private void mapBook(BookDto source, Book target) {
         target.setBookId(source.bookId());
         target.setBookName(source.bookName());

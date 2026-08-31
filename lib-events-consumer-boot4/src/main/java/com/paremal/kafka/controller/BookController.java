@@ -27,16 +27,25 @@ public class BookController {
 
     private final BookService bookService;
 
+    /**
+     * Creates the controller with the required book service dependency.
+     */
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
 
+    /**
+     * Returns all books.
+     */
     @GetMapping
     public ResponseEntity<List<BookResponseDto>> getAllBooks() {
         log.info("GET /v1/books");
         return ResponseEntity.ok(bookService.findAll());
     }
 
+    /**
+     * Returns a single book by ID when present, otherwise 404.
+     */
     @GetMapping("/{bookId}")
     public ResponseEntity<BookResponseDto> getBookById(@PathVariable Integer bookId) {
         log.info("GET /v1/books/{}", bookId);
@@ -45,6 +54,9 @@ public class BookController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Creates a new book and returns it with 201 status.
+     */
     @PostMapping
     public ResponseEntity<BookResponseDto> createBook(@RequestBody @Valid BookDto bookDto) {
         log.info("POST /v1/books - {}", bookDto);
@@ -52,6 +64,9 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    /**
+     * Updates an existing book and returns 404 if it does not exist.
+     */
     @PutMapping("/{bookId}")
     public ResponseEntity<BookResponseDto> updateBook(@PathVariable Integer bookId,
                                                       @RequestBody @Valid BookDto bookDto) {
@@ -61,6 +76,9 @@ public class BookController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /**
+     * Deletes a book by ID and returns 204 on success or 404 when missing.
+     */
     @DeleteMapping("/{bookId}")
     public ResponseEntity<Void> deleteBook(@PathVariable Integer bookId) {
         log.info("DELETE /v1/books/{}", bookId);

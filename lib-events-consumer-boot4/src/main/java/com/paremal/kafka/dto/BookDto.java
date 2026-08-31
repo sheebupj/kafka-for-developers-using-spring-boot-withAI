@@ -3,6 +3,9 @@ package com.paremal.kafka.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Request DTO representing book data for create/update operations.
+ */
 public record BookDto(
         @NotNull(message = "bookId is required") Integer bookId,
         @NotBlank(message = "bookName is required") String bookName,

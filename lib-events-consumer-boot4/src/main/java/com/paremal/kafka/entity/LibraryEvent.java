@@ -15,6 +15,9 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
+/**
+ * JPA entity representing a library event and its associated book.
+ */
 @Entity
 @Table(name = "library_event")
 public class LibraryEvent {
