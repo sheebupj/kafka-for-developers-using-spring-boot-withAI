@@ -51,7 +51,16 @@ public class LibraryEventsConsumerConfig {
     DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaOperations<Object, Object> kafkaTemplate) {
        return new DeadLetterPublishingRecoverer(
                kafkaTemplate,
-               (consumerRecord, exception) -> new TopicPartition(consumerRecord.topic() + ".DLT", consumerRecord.partition()));
+               (consumerRecord, exception) -> {
+                   log.warn(
+                           "Routing record to DLT. topic={}, partition={}, offset={}, error={}",
+                           consumerRecord.topic(),
+                           consumerRecord.partition(),
+                           consumerRecord.offset(),
+                           exception.getMessage(),
+                           exception);
+                   return new TopicPartition(consumerRecord.topic() + ".DLT", consumerRecord.partition());
+               });
     }
 
     /**
