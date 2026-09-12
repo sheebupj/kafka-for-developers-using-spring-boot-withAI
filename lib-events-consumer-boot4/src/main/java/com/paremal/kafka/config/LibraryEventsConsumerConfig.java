@@ -15,8 +15,8 @@ import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import org.springframework.kafka.support.serializer.DeserializationException;
-import org.springframework.util.backoff.FixedBackOff;
 
 /**
  * Kafka consumer configuration for listener containers and error recovery behavior.
@@ -68,9 +68,12 @@ public class LibraryEventsConsumerConfig {
      */
     @Bean
     DefaultErrorHandler defaultErrorHandler(DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
+       var exponentialBackOff = new ExponentialBackOffWithMaxRetries(2);
+       exponentialBackOff.setInitialInterval(1_000L);
+       exponentialBackOff.setMultiplier(2.0);
        var errorHandler = new DefaultErrorHandler(
                deadLetterPublishingRecoverer,
-               new FixedBackOff(1_000L, 2L));
+               exponentialBackOff);
        errorHandler.setRetryListeners((consumerRecord, exception, deliveryAttempt) -> log.warn(
                "Retrying record. topic={}, partition={}, offset={}, deliveryAttempt={}",
                        consumerRecord.topic(),
