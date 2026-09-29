@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
@@ -15,6 +16,7 @@ import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.listener.RetryListener;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import org.springframework.kafka.support.serializer.DeserializationException;
 
@@ -74,15 +76,33 @@ public class LibraryEventsConsumerConfig {
        var errorHandler = new DefaultErrorHandler(
                deadLetterPublishingRecoverer,
                exponentialBackOff);
-       errorHandler.setRetryListeners((consumerRecord, exception, deliveryAttempt) -> log.warn(
-               "Retrying record. topic={}, partition={}, offset={}, deliveryAttempt={}",
+       // errorHandler.setRetryListeners((consumerRecord, exception, deliveryAttempt) -> log.warn(
+       //         "Retrying record. topic={}, partition={}, offset={}, deliveryAttempt={}",
+       //                 consumerRecord.topic(),
+       //                 consumerRecord.partition(),
+       //                 consumerRecord.offset(),
+       //         deliveryAttempt,
+       //         exception));
+       errorHandler.setRetryListeners(new RetryListener() {
+           @Override
+           public void failedDelivery(org.apache.kafka.clients.consumer.ConsumerRecord<?, ?> consumerRecord,
+                                     Exception exception,
+                                     int deliveryAttempt) {
+               log.warn(
+                       "Retrying record. topic={}, partition={}, offset={}, deliveryAttempt={}",
                        consumerRecord.topic(),
                        consumerRecord.partition(),
                        consumerRecord.offset(),
-               deliveryAttempt,
-               exception));
-       errorHandler.addNotRetryableExceptions(DeserializationException.class, SerializationException.class);
-       errorHandler.addNotRetryableExceptions(IllegalArgumentException.class);
+                       deliveryAttempt,
+                       exception);
+           }
+       });
+       errorHandler.addNotRetryableExceptions(
+               DeserializationException.class,
+               NullPointerException.class,
+               IllegalArgumentException.class
+               );
+
        errorHandler.setCommitRecovered(true);
        return errorHandler;
     }
