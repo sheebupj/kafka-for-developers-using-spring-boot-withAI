@@ -2,12 +2,11 @@ package com.paremal.kafka.config;
 
 import com.paremal.kafka.dto.LibraryEventDto;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.SerializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
@@ -28,6 +27,9 @@ import org.springframework.kafka.support.serializer.DeserializationException;
 public class LibraryEventsConsumerConfig {
 
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsConsumerConfig.class);
+    private static final String DLT_RECOVERY_MODE = "dlt";
+    private static final String LOG_SKIP_RECOVERY_MODE = "log_skip";
+    private static final String DEAD_LETTER_TOPIC = "library-event.DLT";
 
     /**
      * Creates the Kafka listener container factory with consumer settings,
@@ -51,7 +53,7 @@ public class LibraryEventsConsumerConfig {
      */
     @Bean
     DeadLetterPublishingRecoverer deadLetterPublishingRecoverer(KafkaOperations<Object, Object> kafkaTemplate) {
-       return new DeadLetterPublishingRecoverer(
+       var recoverer = new DeadLetterPublishingRecoverer(
                kafkaTemplate,
                (consumerRecord, exception) -> {
                    log.warn(
@@ -61,21 +63,27 @@ public class LibraryEventsConsumerConfig {
                            consumerRecord.offset(),
                            exception.getMessage(),
                            exception);
-                   return new TopicPartition(consumerRecord.topic() + ".DLT", consumerRecord.partition());
+                   return new TopicPartition(DEAD_LETTER_TOPIC, consumerRecord.partition());
                });
+       recoverer.setFailIfSendResultIsError(true);
+       return recoverer;
     }
 
     /**
      * Configures retry and recovery behavior for listener failures.
      */
     @Bean
-    DefaultErrorHandler defaultErrorHandler(DeadLetterPublishingRecoverer deadLetterPublishingRecoverer) {
+    DefaultErrorHandler defaultErrorHandler(
+            DeadLetterPublishingRecoverer deadLetterPublishingRecoverer,
+            @Value("${app.kafka.recovery.mode:dlt}") String recoveryMode) {
        var exponentialBackOff = new ExponentialBackOffWithMaxRetries(2);
        exponentialBackOff.setInitialInterval(1_000L);
        exponentialBackOff.setMultiplier(2.0);
-       var errorHandler = new DefaultErrorHandler(
-               deadLetterPublishingRecoverer,
-               exponentialBackOff);
+       var errorHandler = switch (recoveryMode.toLowerCase(java.util.Locale.ROOT)) {
+           case DLT_RECOVERY_MODE -> new DefaultErrorHandler(deadLetterPublishingRecoverer, exponentialBackOff);
+           case LOG_SKIP_RECOVERY_MODE -> new DefaultErrorHandler(exponentialBackOff);
+           default -> throw new IllegalArgumentException("Unsupported Kafka recovery mode: " + recoveryMode);
+       };
        // errorHandler.setRetryListeners((consumerRecord, exception, deliveryAttempt) -> log.warn(
        //         "Retrying record. topic={}, partition={}, offset={}, deliveryAttempt={}",
        //                 consumerRecord.topic(),

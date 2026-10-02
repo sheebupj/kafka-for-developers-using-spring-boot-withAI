@@ -23,6 +23,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @EmbeddedKafka(
@@ -101,6 +102,8 @@ class LibraryEventsServiceIntegrationTest {
         assertEquals(EventType.UPDATE, updatedEvent.getEventType());
         assertEquals("New Name", updatedEvent.getBook().getBookName());
         assertEquals("New Author", updatedEvent.getBook().getBookAuthor());
+        assertEquals(1, bookRepository.count());
+        assertEquals(savedId, updatedEvent.getBook().getLibraryEvent().getLibraryEventId());
     }
 
     @Test
@@ -113,6 +116,7 @@ class LibraryEventsServiceIntegrationTest {
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> libraryEventService.processEvent(record));
         assertEquals("LibraryEvent not found for libraryEventId=999", exception.getMessage());
+        assertNoEventsPersisted();
     }
 
     @Test
@@ -125,6 +129,54 @@ class LibraryEventsServiceIntegrationTest {
         var exception = assertThrows(IllegalArgumentException.class,
                 () -> libraryEventService.processEvent(record));
         assertEquals("libraryEventId is required for UPDATE events", exception.getMessage());
+        assertNoEventsPersisted();
+    }
+
+    @Test
+    void processEvent_withNullPayload_shouldThrowIllegalArgumentExceptionAndNotPersist() {
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> libraryEventService.processEvent(buildConsumerRecord(null, null)));
+
+        assertEquals("libraryEvent payload cannot be null", exception.getMessage());
+        assertNoEventsPersisted();
+    }
+
+    @Test
+    void processEvent_withNullEventType_shouldThrowIllegalArgumentExceptionAndNotPersist() {
+        var dto = new LibraryEventDto(null, null, new BookDto(1, "Kafka", "Dilip"));
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> libraryEventService.processEvent(buildConsumerRecord(null, dto)));
+
+        assertTrue(exception.getMessage().contains("eventType eventType is required"));
+        assertNoEventsPersisted();
+    }
+
+    @Test
+    void processEvent_withNullBook_shouldThrowIllegalArgumentExceptionAndNotPersist() {
+        var dto = new LibraryEventDto(null, EventType.ADD, null);
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> libraryEventService.processEvent(buildConsumerRecord(null, dto)));
+
+        assertEquals("Validation failed: book book is required", exception.getMessage());
+        assertNoEventsPersisted();
+    }
+
+    @Test
+    void processEvent_withInvalidBook_shouldThrowIllegalArgumentExceptionAndNotPersist() {
+        var dto = new LibraryEventDto(null, EventType.ADD, new BookDto(null, "", ""));
+
+        var exception = assertThrows(IllegalArgumentException.class,
+                () -> libraryEventService.processEvent(buildConsumerRecord(null, dto)));
+
+        assertTrue(exception.getMessage().startsWith("Validation failed:"));
+        assertNoEventsPersisted();
+    }
+
+    private void assertNoEventsPersisted() {
+        assertEquals(0, libraryEventRepository.count());
+        assertEquals(0, bookRepository.count());
     }
 
     private ConsumerRecord<Integer, LibraryEventDto> buildConsumerRecord(Integer key, LibraryEventDto value) {

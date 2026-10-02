@@ -413,3 +413,11 @@ docker logs --tail 50 <container_name>
 # Follow errors in real-time
 docker logs -f <container_name> | grep -i error
 ```
+
+
+### Creating a topic named library-events with 3 partitions and a replication factor of 2:
+docker exec -it kafka1 kafka-topics --bootstrap-server kafka1:19092 \
+--create \
+--topic library-event \
+--partitions 3 \
+--replication-factor 3

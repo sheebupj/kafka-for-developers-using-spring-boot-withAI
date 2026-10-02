@@ -35,6 +35,6 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.IntegerSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 app:
-    kafka:
-      recovery:
-        mode: dlt # options: failure-table | dlt | both | log_skip
+  kafka:
+    recovery:
+      mode: dlt
