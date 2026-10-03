@@ -37,4 +37,4 @@ spring:
 app:
   kafka:
     recovery:
-      mode: dlt
+      mode: failure-table

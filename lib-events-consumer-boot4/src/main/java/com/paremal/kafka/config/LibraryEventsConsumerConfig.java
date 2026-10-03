@@ -29,6 +29,7 @@ public class LibraryEventsConsumerConfig {
     private static final Logger log = LoggerFactory.getLogger(LibraryEventsConsumerConfig.class);
     private static final String DLT_RECOVERY_MODE = "dlt";
     private static final String LOG_SKIP_RECOVERY_MODE = "log_skip";
+    private static final String FAILURE_TABLE_RECOVERY_MODE = "failure-table";
     private static final String DEAD_LETTER_TOPIC = "library-event.DLT";
 
     /**
@@ -75,12 +76,14 @@ public class LibraryEventsConsumerConfig {
     @Bean
     DefaultErrorHandler defaultErrorHandler(
             DeadLetterPublishingRecoverer deadLetterPublishingRecoverer,
+            FailureTableRecoverer failureTableRecoverer,
             @Value("${app.kafka.recovery.mode:dlt}") String recoveryMode) {
        var exponentialBackOff = new ExponentialBackOffWithMaxRetries(2);
        exponentialBackOff.setInitialInterval(1_000L);
        exponentialBackOff.setMultiplier(2.0);
        var errorHandler = switch (recoveryMode.toLowerCase(java.util.Locale.ROOT)) {
            case DLT_RECOVERY_MODE -> new DefaultErrorHandler(deadLetterPublishingRecoverer, exponentialBackOff);
+           case FAILURE_TABLE_RECOVERY_MODE -> new DefaultErrorHandler(failureTableRecoverer, exponentialBackOff);
            case LOG_SKIP_RECOVERY_MODE -> new DefaultErrorHandler(exponentialBackOff);
            default -> throw new IllegalArgumentException("Unsupported Kafka recovery mode: " + recoveryMode);
        };
