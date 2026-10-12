@@ -12,8 +12,9 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaOperations;
-import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ConsumerRecordRecoverer;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.RetryListener;
 import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
@@ -86,10 +87,7 @@ public class LibraryEventsConsumerConfig {
            case DLT_RECOVERY_MODE -> new DefaultErrorHandler(deadLetterPublishingRecoverer, exponentialBackOff);
            case FAILURE_TABLE_RECOVERY_MODE -> new DefaultErrorHandler(failureTableRecoverer, exponentialBackOff);
            case BOTH_RECOVERY_MODE -> new DefaultErrorHandler(
-                   (consumerRecord, exception) -> {
-                       failureTableRecoverer.accept(consumerRecord, exception);
-                       deadLetterPublishingRecoverer.accept(consumerRecord, exception);
-                   },
+                   bothRecoverer(failureTableRecoverer, deadLetterPublishingRecoverer),
                    exponentialBackOff);
            case LOG_SKIP_RECOVERY_MODE -> new DefaultErrorHandler(exponentialBackOff);
            default -> throw new IllegalArgumentException("Unsupported Kafka recovery mode: " + recoveryMode);
@@ -123,5 +121,30 @@ public class LibraryEventsConsumerConfig {
 
        errorHandler.setCommitRecovered(true);
        return errorHandler;
+    }
+
+    static ConsumerRecordRecoverer bothRecoverer(
+            ConsumerRecordRecoverer failureTableRecoverer,
+            ConsumerRecordRecoverer deadLetterPublishingRecoverer) {
+        return (consumerRecord, exception) -> {
+            RuntimeException recoveryFailure = null;
+            try {
+                failureTableRecoverer.accept(consumerRecord, exception);
+            } catch (RuntimeException failure) {
+                recoveryFailure = failure;
+            }
+            try {
+                deadLetterPublishingRecoverer.accept(consumerRecord, exception);
+            } catch (RuntimeException failure) {
+                if (recoveryFailure == null) {
+                    recoveryFailure = failure;
+                } else {
+                    recoveryFailure.addSuppressed(failure);
+                }
+            }
+            if (recoveryFailure != null) {
+                throw recoveryFailure;
+            }
+        };
     }
 }

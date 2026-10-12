@@ -564,9 +564,9 @@ In this project, recovery is **configurable** via `app.kafka.recovery.mode`. The
 
 | Mode | What happens | When to use |
 |---|---|---|
-| **`failure-table`** (default) | Save failed record to `failure_record` with status `OPEN` | Current teaching default for scheduler-based retry flow |
+| **`failure-table`** | Save failed record to `library_event_failure` | Database-based failure inspection |
 | **`dlt`** | Publish failed record to `<topic>.DLT` with failure metadata headers | Kafka-native replay and audit trail |
-| **`both`** | Persist to `failure_record` and publish to DLT | Demonstrate/operate both recovery paths together |
+| **`both`** | Save failed record to `library_event_failure` and publish to `<topic>.DLT` | Use both recovery paths together |
 | **Custom lambda** | Any custom side effect (log/alert/persist elsewhere) | Advanced or domain-specific recovery behavior |
 
 **Key contract:** the recoverer is called once after all retry attempts are exhausted. After it returns (or throws), the offset advances and the partition unblocks. If recovery code throws, the failure is reported via `RetryListener.recoveryFailed(...)`.
@@ -577,12 +577,12 @@ In this project, recovery is **configurable** via `app.kafka.recovery.mode`. The
 app:
   kafka:
     recovery:
-      mode: failure-table # options: failure-table | dlt | both
+      mode: dlt # options: failure-table | dlt | both | log_skip
 ```
 
-- `failure-table` (default): `FailureRecordService.saveFailureRecord(...)`
+- `failure-table`: `FailureTableRecoverer.accept(...)`
 - `dlt`: `DeadLetterPublishingRecoverer.accept(...)`
-- `both`: executes both paths in sequence
+- `both`: attempts both persistence and DLT publishing; if either fails, recovery reports the error after attempting both
 
 ---
 

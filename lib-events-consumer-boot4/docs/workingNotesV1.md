@@ -134,3 +134,9 @@ docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
 Recreate with 3 partitions and replication factor 3
 docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
   --create --topic library-events --partitions 3 --replication-factor 3
+
+ docker exec kafka1 kafka-console-consumer --bootstrap-server localhost:9092
+  --topic library-event.DLT --from-beginning 
+  --property print.key=true --property print.partition=true --property print.offset=true
+
+docker exec -it kafka1 kafka-console-consumer.sh   --bootstrap-server localhost:9092   --topic library-event.DLT   --from-beginning

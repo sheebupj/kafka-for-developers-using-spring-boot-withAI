@@ -42,3 +42,34 @@ LibraryEventServiceTest now covers add, update, update-id-required, not-found, n
 ◦
 LibraryEventsConsumerTest updated to verify delegation via mock service
 No new Flyway migration was required for this step since the implemented business logic did not introduce new columns/indexes/constraints.
+
+
+integration Test
+
+Test-> Event to Kafka topic "library-events"-> onMessage-> libraryEventService.processEvent->DB
+Check the DB and event is persisted
+Test for ADD,UPDATE
+Test for invalid Events
+pass the book as null
+Update Event Type with pnull libraryEventId
+
+Write the integration test cases covering all these scenarios
+
+ensure to use skills under the .github folder
+
+
+Error Recovery strategy - failure table
+
+add an new error recovery strategy where complete error information need to stored in a table
+	-set the recovery mode in the application.yml file as failure-table
+	-Add new db migration for failure table
+	-Add the entity and repository to interact with the table
+	-add thelogic to persist the failed record in the db table as part of the ConsumerRecordRecoverer
+
+list topics in broker
+docker exec kafka1 kafka-topics --bootstrap-server localhost:9092 --list
+
+print all messages from topic
+docker exec -it kafka1 kafka-console-consumer   --bootstrap-server localhost:9092   --topic library-events.DLT --from-beginning
+
+
