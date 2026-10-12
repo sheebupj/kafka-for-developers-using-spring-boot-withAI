@@ -140,3 +140,18 @@ docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
   --property print.key=true --property print.partition=true --property print.offset=true
 
 docker exec -it kafka1 kafka-console-consumer.sh   --bootstrap-server localhost:9092   --topic library-event.DLT   --from-beginning
+
+
+I would like to introduced a new recovery mode named "both". 
+This mode should publish to the DeadLetterPublishingRecoverer and also persistt into the "library_Event_failure" table. 
+Male the change and do not worry about the integration test at this point.
+
+
+Add new integration test case to cover failure scenario
+test case need to validate following things
+	-publish an update libraryEvent where there is no libraryEventId in the event
+	-Ensure the recovery block executed by consuming tge nessage from the library-event.DLT
+	-Ensure there is an entry in the library_event_failure table
+	-Make sure that kafka recovery mode is both
+	
+	
