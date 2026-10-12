@@ -30,7 +30,8 @@ public class LibraryEventsConsumerConfig {
     private static final String DLT_RECOVERY_MODE = "dlt";
     private static final String LOG_SKIP_RECOVERY_MODE = "log_skip";
     private static final String FAILURE_TABLE_RECOVERY_MODE = "failure-table";
-    private static final String DEAD_LETTER_TOPIC = "library-event.DLT";
+    private static final String BOTH_RECOVERY_MODE = "both";
+    private static final String DEAD_LETTER_TOPIC = "library-events.DLT";
 
     /**
      * Creates the Kafka listener container factory with consumer settings,
@@ -84,6 +85,12 @@ public class LibraryEventsConsumerConfig {
        var errorHandler = switch (recoveryMode.toLowerCase(java.util.Locale.ROOT)) {
            case DLT_RECOVERY_MODE -> new DefaultErrorHandler(deadLetterPublishingRecoverer, exponentialBackOff);
            case FAILURE_TABLE_RECOVERY_MODE -> new DefaultErrorHandler(failureTableRecoverer, exponentialBackOff);
+           case BOTH_RECOVERY_MODE -> new DefaultErrorHandler(
+                   (consumerRecord, exception) -> {
+                       failureTableRecoverer.accept(consumerRecord, exception);
+                       deadLetterPublishingRecoverer.accept(consumerRecord, exception);
+                   },
+                   exponentialBackOff);
            case LOG_SKIP_RECOVERY_MODE -> new DefaultErrorHandler(exponentialBackOff);
            default -> throw new IllegalArgumentException("Unsupported Kafka recovery mode: " + recoveryMode);
        };
