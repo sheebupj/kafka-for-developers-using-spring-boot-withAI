@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.transaction.KafkaTransactionManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,9 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.producer.value-serializer}")
     private Class<?> valueSerializerClass;
 
+    @Value("${spring.kafka.producer.transaction-id-prefix}")
+    private String transactionIdPrefix;
+
     @Bean
     public ProducerFactory<Integer, Object> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -30,11 +34,21 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.ACKS_CONFIG, "all");
         configProps.put(ProducerConfig.RETRIES_CONFIG, 5);
         configProps.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-        return new DefaultKafkaProducerFactory<>(configProps);
+        var factory = new DefaultKafkaProducerFactory<Integer, Object>(configProps);
+        factory.setTransactionIdPrefix(transactionIdPrefix);
+        return factory;
     }
 
     @Bean
     public KafkaTemplate<Integer, Object> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+        var template = new KafkaTemplate<>(producerFactory());
+        // keeps the existing non-@Transactional send methods working with a transactional producer factory
+        template.setAllowNonTransactional(true);
+        return template;
+    }
+
+    @Bean
+    public KafkaTransactionManager<Integer, Object> kafkaTransactionManager() {
+        return new KafkaTransactionManager<>(producerFactory());
     }
 }

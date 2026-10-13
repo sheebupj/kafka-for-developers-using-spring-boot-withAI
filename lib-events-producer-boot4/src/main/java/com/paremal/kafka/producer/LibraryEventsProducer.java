@@ -10,10 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Counter;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -117,5 +121,31 @@ public class LibraryEventsProducer {
     /** convenience overload that uses the configured default topic */
     public RecordMetadata sendSynchronously(Integer key, LibraryEvent value) {
         return sendSynchronously(this.defaultTopic, key, value);
+    }
+
+    /**
+     * Send a library event inside a Kafka transaction and block until the broker acknowledges it.
+     * The transaction commits when the method returns and rolls back if it throws.
+     */
+    @Transactional
+    public CompletableFuture<RecordMetadata> sendInTransaction(String topic, Integer key, LibraryEvent value) {
+        return send(topic, key, value);
+    }
+
+    /** convenience overload that uses the configured default topic */
+    @Transactional
+    public CompletableFuture<RecordMetadata> sendInTransaction(Integer key, LibraryEvent value) {
+        return send(this.defaultTopic, key, value);
+    }
+
+
+    /**
+     * Send several library events atomically: either all are committed or none are visible to consumers.
+     */
+    @Transactional
+    public List<RecordMetadata> sendAllInTransaction(String topic, Map<Integer, LibraryEvent> events) {
+        List<RecordMetadata> results = new ArrayList<>();
+        events.forEach((key, value) -> results.add(sendSynchronously(topic, key, value)));
+        return results;
     }
 }
