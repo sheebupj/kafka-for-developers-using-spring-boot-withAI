@@ -27,7 +27,7 @@ public class LibraryEventService {
             libraryEvent.setTimestamp(Instant.now());
         }
         Integer key = Math.toIntExact(libraryEvent.getLibraryEventId());
-        return producer.send(key, libraryEvent)
+        return producer.sendInTransaction(key, libraryEvent)
                 .whenComplete((md, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish ADD event id={}", libraryEvent.getLibraryEventId(), ex);
@@ -46,7 +46,7 @@ public class LibraryEventService {
             libraryEvent.setTimestamp(Instant.now());
         }
         Integer key = Math.toIntExact(libraryEvent.getLibraryEventId());
-        return producer.send(key, libraryEvent)
+        return producer.sendInTransaction(key, libraryEvent)
                 .whenComplete((md, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish UPDATE event id={}", libraryEvent.getLibraryEventId(), ex);
