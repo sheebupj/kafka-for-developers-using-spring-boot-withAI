@@ -129,13 +129,19 @@ public class LibraryEventsProducer {
      */
     @Transactional
     public CompletableFuture<RecordMetadata> sendInTransaction(String topic, Integer key, LibraryEvent value) {
+        if (value.getBook() != null && "transaction".equals(value.getBook().getBookName())) {
+            for (int i = 0; i < 3; i++) {
+                sendSynchronously(topic, key, value);
+            }
+           // throw new KafkaPublishException("Deliberate failure after publishing transaction test event");
+        }
         return send(topic, key, value);
     }
 
     /** convenience overload that uses the configured default topic */
     @Transactional
     public CompletableFuture<RecordMetadata> sendInTransaction(Integer key, LibraryEvent value) {
-        return send(this.defaultTopic, key, value);
+        return sendInTransaction(this.defaultTopic, key, value);
     }
 
 
