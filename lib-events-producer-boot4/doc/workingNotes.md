@@ -1,3 +1,4 @@
+
 cd "c:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI"; Expand-Archive -Path "lib-events-producer-boot4.zip" -DestinationPath "." -Force; Get-ChildItem -Name
 
 cd "c:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI\lib-events-producer-boot4"; git init; git add .; git commit -m "Initial commit"; git log --oneline | head -1
@@ -134,3 +135,7 @@ docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
 Recreate with 3 partitions and replication factor 3
 docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
   --create --topic library-events --partitions 3 --replication-factor 3
+
+
+SPRING_PROFILES_ACTIVE,SPRING_KAFKA_BOOTSTRAP_SERVERS 
+ make then configures as environment varaibles for this app
