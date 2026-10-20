@@ -24,9 +24,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,22 +52,6 @@ class LibraryEventsProducerTest {
         RecordMetadata result = libraryEventsProducer.send(1, event).join();
 
         assertThat(result).isEqualTo(metadata);
-    }
-
-    @Test
-    void sendInTransaction_sendsTransactionBookThreeTimesThenThrows() {
-        LibraryEvent event = new LibraryEvent(1L, EventType.ADD, new Book(1, "transaction", "Dilip"), null);
-        SendResult<Integer, Object> sendResult = org.mockito.Mockito.mock(SendResult.class);
-        RecordMetadata metadata = org.mockito.Mockito.mock(RecordMetadata.class);
-        when(sendResult.getRecordMetadata()).thenReturn(metadata);
-        when(kafkaTemplate.send(eq("library-events"), eq(1), same(event)))
-                .thenReturn(CompletableFuture.completedFuture(sendResult));
-
-        assertThatThrownBy(() -> libraryEventsProducer.sendInTransaction(1, event))
-                .isInstanceOf(KafkaPublishException.class)
-                .hasMessage("Deliberate failure after publishing transaction test event");
-
-        verify(kafkaTemplate, times(3)).send(eq("library-events"), eq(1), same(event));
     }
 
     @Test

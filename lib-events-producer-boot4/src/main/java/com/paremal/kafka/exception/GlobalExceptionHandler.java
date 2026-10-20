@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.KafkaException;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -54,6 +56,21 @@ public class GlobalExceptionHandler {
         );
 
         log.error("Kafka publish error", ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
+    }
+
+    @ExceptionHandler({CannotCreateTransactionException.class, KafkaException.class})
+    public ResponseEntity<ApiErrorResponse> handleKafkaUnavailable(Exception ex) {
+        List<ApiErrorResponse.FieldError> errors = new ArrayList<>();
+        errors.add(new ApiErrorResponse.FieldError("kafka", "Kafka is unavailable"));
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "Kafka publish failed",
+                errors
+        );
+
+        log.error("Kafka unavailable", ex);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
     }
 
