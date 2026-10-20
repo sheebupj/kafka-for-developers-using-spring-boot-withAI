@@ -38,3 +38,20 @@ app:
   kafka:
     recovery:
       mode: both
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true               # enables /actuator/health/liveness and /actuator/health/readiness
+        add-additional-paths: true  # also exposes /livez and /readyz at the root
+      show-details: always
+      group:
+        liveness:
+          include: livenessState
+  health:
+    livenessstate:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info      # only health and info are exposed over HTTP
