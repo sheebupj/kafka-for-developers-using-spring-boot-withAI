@@ -38,9 +38,13 @@ management:
       show-details: always
       group:
         liveness:
-          include: livenessState
+          include: livenessState,kafkaReadiness
+        readiness:
+          include: readinessState,kafkaReadiness
   health:
     livenessstate:
+      enabled: true
+    readinessstate:
       enabled: true
   endpoints:
     web:
