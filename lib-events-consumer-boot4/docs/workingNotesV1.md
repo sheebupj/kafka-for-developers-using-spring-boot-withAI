@@ -155,3 +155,32 @@ test case need to validate following things
 	-Make sure that kafka recovery mode is both
 	
 	
+Build the Docker Image
+docker build -t lib-events-consumer-boot4:v1
+
+
+Run the Container
+docker run --name lib-events-consumer-boot4 \
+  -p 8081:8081 \
+  -e SPRING_PROFILES_ACTIVE=dev \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5433/mydatabase \
+  -e SPRING_DATASOURCE_USERNAME=myuser \
+  -e SPRING_DATASOURCE_PASSWORD=secret \
+  -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:29092 \
+  -e SPRING_KAFKA_CONSUMER_GROUP_ID=library-events-listener-group-dev \
+  lib-events-consumer-boot4:v1
+
+Pushing to Docker Hub
+# Step 1: Login to Docker Hub
+docker login
+# Enter your Docker Hub username and password
+
+# Step 2: Tag the image with your Docker Hub username
+# The tag must match the registry path format
+docker tag lib-events-consumer-boot4:v1 yoursname/lib-events-consumer-boot4:v1
+
+# Step 3: Push the image
+docker push yoursname/lib-events-consumer-boot4:v1
+Push to my repo
+docker tag lib-events-consumer-boot4:v1 sheebupj/lib-events-consumer-boot4:v1
+docker push sheebupj/lib-events-consumer-boot4:v1

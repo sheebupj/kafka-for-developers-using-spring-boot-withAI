@@ -278,3 +278,37 @@ EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 using this docker file reference , create a docker file
+
+Build the Docker Image
+docker build -t lib-events-producer-boot4:v1 
+
+Run the container
+docker run --name lib-events-producer-boot4 \
+  -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=dev \
+  -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:29092 \
+  library-events-producer:v1
+
+pushing image to Docker Hub
+# Step 1: Login to Docker Hub
+docker login
+# Enter your Docker Hub username and password
+
+# Step 2: Tag the image with your Docker Hub username
+# The tag must match the registry path format
+docker tag library-events-producer:v1 yourusername/library-events-producer:v1
+
+# Step 3: Push the image
+docker push yourusername/library-events-producer:1.0
+
+
+docker tag lib-events-producer-boot4:v1 sheebupj/lib-events-producer-boot4:v1
+docker push sheebupj/lib-events-producer-boot4:v1
+
+docker run --name lib-events-producer-boot4 \
+  -p 18080:8080 \
+  -e SPRING_PROFILES_ACTIVE=dev \
+  -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:29092 \
+  sheebupj/lib-events-producer-boot4:v1
+
+
