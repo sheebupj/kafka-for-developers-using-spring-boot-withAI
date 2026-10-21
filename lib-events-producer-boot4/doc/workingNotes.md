@@ -54,18 +54,22 @@ Please do not touch the current code add this synchronous code in a separate fun
 .\gradlew.bat :lib-events-producer-boot4:test --no-daemon
 & 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI\lib-events-producer-boot4\gradlew.bat' 
 test --no-daemon
-git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI' --no-pager diff 
+git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI' 
+--no-pager diff 
 -- lib-events-producer-boot4/src/main/java/com/paremal
 
 git --no-pager diff HEAD -- path/to/file
 
-& 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI\lib-events-producer-boot4\gradlew.bat' 
+& 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI
+\lib-events-producer-boot4\gradlew.bat' 
   test    --no-daemon
 
 git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI' 
-   --no-pager diff -- lib-events-producer-boot4/src/main/java/com/paremal/kafka/producer/LibraryEventsProducer.java lib-events
+   --no-pager diff -- lib-events-producer-boot4/src/main/java/com/paremal/kafka/producer
+/LibraryEventsProducer.java lib-events
 
-& 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI\lib-events-producer-boot4\gradlew.bat' 
+& 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI\lib-events-producer-boot4
+\gradlew.bat' 
   test    --no-daemon
 
 git -C 'C:\Users\Sheebu P J\data\Kafka-projects\kafka-for-developers-using-spring-boot-withAI' 
@@ -102,10 +106,12 @@ PUT handler wired through service to the Kafka producer.
 
 Exit Criteria
 
-A valid UPDATE event with a non-null id PUT to the endpoint is published to the Kafka topic and returns 200 with full payload.
+A valid UPDATE event with a non-null id PUT to the endpoint is published to the Kafka topic and returns
+200 with full payload.
 
 I want you to create a skill file for me for the integration testing.
-Please ensure the skill is going to cover the right annotations, and since this is a kaka producer app it should use embedded for the kafka infrastructure.
+Please ensure the skill is going to cover the right annotations, and since this is a kaka producer app
+it should use embedded for the kafka infrastructure.
 mocvkMVC for the endpoint calls.
 Ensure to use @SpringBootTest to load the whole spring context.
 
@@ -115,7 +121,8 @@ there is a file ".github/skills/integration-testing/SKILL.md" already present he
 
 I would like to create another skill for the controller class that I have here.
 Any interegration with the kafkaTemplate should return a CompletableFuture.
-If the integration is a DB then I would like return the regular types or the return value wrapped in a ResponseEntity.
+If the integration is a DB then I would like return the regular types or the return value wrapped in a
+ResponseEntity.
 I want the errorhandling to be done using the RestControllerAdvice annotation.
 Payload validations very similr to what we have in the LibraryEventsController.
 
@@ -139,3 +146,135 @@ docker exec kafka1 kafka-topics --bootstrap-server kafka1:19092 \
 
 SPRING_PROFILES_ACTIVE,SPRING_KAFKA_BOOTSTRAP_SERVERS 
  make then configures as environment varaibles for this app
+
+
+In Windows Command Prompt, run:
+tasklist | findstr /i "java"
+For Java process IDs and main class names (if a JDK is installed and jps is on your PATH), use:
+jps -lv
+
+git bash command
+In Git Bash, use:
+tasklist.exe | grep -i java
+For Java process IDs and main class names, if the JDK’s bin directory is on your PATH:
+jps.exe -lv
+
+ -v option prints every JVM argument, making the output very long. For a concise list of process IDs and main 
+ classes or JARs, run:
+jps -l
+To show only JAR-based apps:
+jps -l | grep '\.jar'
+
+
+The JVM's default time zone resolves to Asia/Calcutta, a legacy ID that your PostgreSQL server rejects. 
+The driver sends the JVM time zone at connect time.
+Your build.gradle sets -Duser.timezone=UTC only for bootRun and test, so it doesn't apply to java -jar.
+Run it with the flag:
+java -Duser.timezone=UTC -jar lib-events-consumer-boot4-0.0.1-SNAPSHOT.jar
+Alternatively, set it as an environment variable: JAVA_TOOL_OPTIONS=-Duser.timezone=UTC.
+To make the fix permanent in code, add TimeZone.setDefault(TimeZone.getTimeZone("UTC")); at the start of
+ main in LibEventsConsumerBoot4Application. Tell me if you want me to add it.
+
+
+Open PowerShell as Administrator and run:
+
+PowerShell
+wsl --status
+
+If WSL is not installed:
+
+PowerShell
+wsl --install
+
+Then restart your PC.
+
+Option B: From Command Prompt / PowerShell
+PowerShell
+wsl
+
+This opens your default Linux distribution.
+
+If you have multiple distros:
+
+PowerShell
+wsl -d Ubuntu
+
+
+Find Installed Distributions
+
+Run from PowerShell:
+
+PowerShell
+wsl -l -v
+
+Example:
+Plain Text
+NAME STATE VERSION
+Ubuntu Stopped 2
+docker-desktop Running 2
+
+Start Ubuntu Explicitly
+PowerShell
+wsl -d Ubuntu
+
+Then:
+
+Shell
+cat /etc/os-release
+
+
+Gradle Tasks Quick Reference
+
+Task	                    What it does
+
+./gradlew build	            Compiles, runs all tests, then packages the JAR
+./gradlew build -x test	    Compiles and packages, skipping tests
+./gradlew clean	            Deletes the build/ directory
+./gradlew clean build	    Clean rebuild of the JAR
+./gradlew bootRun	        Runs the app via Gradle (similar to IntelliJ run, no JAR produced)
+./gradlew tasks	            Lists all available Gradle tasks
+
+Docker file
+
+# ─────────────────────────────────────────────────────────
+# FROM — choose your base image
+# Every Dockerfile starts with FROM.
+# Think of it as: "Start with this pre-built environment."
+# ─────────────────────────────────────────────────────────
+FROM eclipse-temurin:25-jre
+
+# ─────────────────────────────────────────────────────────
+# WORKDIR — set the working directory inside the container
+# All subsequent commands run from this directory.
+# If it doesn't exist, Docker creates it.
+# ─────────────────────────────────────────────────────────
+WORKDIR /app
+
+# ─────────────────────────────────────────────────────────
+# ARG — defines a build-time variable
+# JAR_FILE can be overridden when running docker build.
+# This makes the Dockerfile flexible for different build outputs.
+# ─────────────────────────────────────────────────────────
+ARG JAR_FILE=build/libs/*-SNAPSHOT.jar
+
+# ─────────────────────────────────────────────────────────
+# COPY — copy files from your machine into the container
+# Syntax: COPY <source on host> <destination in container>
+# ─────────────────────────────────────────────────────────
+COPY ${JAR_FILE} /app/app.jar
+
+# ─────────────────────────────────────────────────────────
+# EXPOSE — document which port the app listens on
+# This is informational — it does NOT publish the port.
+# You still need -p when running the container.
+# ─────────────────────────────────────────────────────────
+EXPOSE 8080
+
+# ─────────────────────────────────────────────────────────
+# ENTRYPOINT — the command to run when the container starts
+# Unlike CMD, ENTRYPOINT cannot be overridden at runtime.
+# Use JSON array format (exec form) — avoids shell overhead.
+# ─────────────────────────────────────────────────────────
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+using this docker file reference , create a docker file
