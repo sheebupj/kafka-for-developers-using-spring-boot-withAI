@@ -310,5 +310,45 @@ docker run --name lib-events-producer-boot4 \
   -e SPRING_PROFILES_ACTIVE=dev \
   -e SPRING_KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:29092 \
   sheebupj/lib-events-producer-boot4:v1
+  
+  
+#setup app in k8
+ # 1. Start Minikube
+minikube start --driver=docker
+
+# 2. Apply ConfigMap first
+kubectl apply -f library-events-producer-configmap.yaml
+
+# 3. Apply Deployment (v4 — uses ConfigMap + liveness & readiness probes)
+kubectl apply -f library-events-producer-deployment-v4.yaml
+
+# 4. Apply Service
+kubectl apply -f library-events-producer-service.yaml
+
+# 5. Apply Ingress
+kubectl apply -f library-events-producer-ingress.yaml
+
+#Tail logs across all 3 replicas:
+kubectl logs -f -l app=library-events-consumer --prefix
+
+# Watch for liveness probe failures and container restarts in real time
+kubectl get pods --watch
+
+# file transfer to ec2 instance (git bash)
+scp -i ~/.ssh/your-key.pem /path/to/local/file.txt ubuntu@your-ec2-ip:/home/ubuntu/
+#eg:
+scp -i ~/.ssh/oct2026mum.pem ./lib-events-producer-boot4-deployment-v1.yml ubuntu@ec2-13-203-155-185.ap-south-1.compute.amazonaws.com:/home/ubuntu/
+
+
+# See cluster-level liveness failure events
+kubectl get events --field-selector reason=Unhealthy
+
+# Watch all cluster events in real time (shows probe failures, restarts, scheduling)
+kubectl get events --watch
+
+#Apply the Deployment
+kubectl apply -f library-events-producer-deployment-v1.yaml
+kubectl logs  pod/lib-events-producer-boot4-8678b5447d-6cmnx
+kubectl logs -f pod/lib-events-producer-boot4-8678b5447d-6cmnx
 
 
