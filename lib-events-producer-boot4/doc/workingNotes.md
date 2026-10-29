@@ -351,4 +351,7 @@ kubectl apply -f library-events-producer-deployment-v1.yaml
 kubectl logs  pod/lib-events-producer-boot4-8678b5447d-6cmnx
 kubectl logs -f pod/lib-events-producer-boot4-8678b5447d-6cmnx
 
+#verbose output to access nodeport
+ curl -v http://172.31.36.85:32519/swagger-ui/index.html
+
 
