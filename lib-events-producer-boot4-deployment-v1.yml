@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: lib-events-producer-boot4
-          image: sheebupj/lib-events-producer-boot4
+          image: sheebupj/lib-events-producer-boot4:v2
           imagePullPolicy: Always
 
           ports:

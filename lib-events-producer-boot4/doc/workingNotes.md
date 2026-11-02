@@ -353,5 +353,6 @@ kubectl logs -f pod/lib-events-producer-boot4-8678b5447d-6cmnx
 
 #verbose output to access nodeport
  curl -v http://172.31.36.85:32519/swagger-ui/swagger-ui/index.html
+curl -v http://172-31-11-99:32519/swagger-ui/swagger-ui/index.html
 
 
