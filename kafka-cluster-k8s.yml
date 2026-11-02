@@ -88,18 +88,13 @@ spec:
           resources:
             requests:
               cpu: "250m"
-              memory: "1Gi"
+              memory: "768Mi"
             limits:
-              memory: "1536Mi"
+              memory: "1Gi"
           volumeMounts:
             - name: data
               mountPath: /var/lib/kafka/data
-  volumeClaimTemplates: # same indent as "template:"
-    - metadata:
-        name: data
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: gp3
-        resources:
-          requests:
-            storage: 5Gi
+      volumes:
+        # Data is lost if a pod is rescheduled; switch to volumeClaimTemplates once a StorageClass (e.g. EBS CSI) exists
+        - name: data
+          emptyDir: {}
