@@ -2,7 +2,7 @@ spring:
   application:
     name: lib-events-producer-boot4
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:

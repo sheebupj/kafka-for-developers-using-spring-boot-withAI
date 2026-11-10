@@ -22,6 +22,9 @@ spec:
 
           ports:
             - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: library-events-producer-config
           env:
             - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-0.kafka-headless:9092"

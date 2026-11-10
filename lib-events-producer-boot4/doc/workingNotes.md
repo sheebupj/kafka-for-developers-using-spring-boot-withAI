@@ -384,6 +384,18 @@ oc delete pods --field-selector status.phase!=Running
 #Delete all non-running pods
 oc delete pods --field-selector status.phase!=Running
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: library-events-producer-config
+  namespace: default
+  labels:
+    app: library-events-producer
+data:
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:29092,host.docker.internal:29094,host.docker.internal:29096"
+  SPRING_PROFILES_ACTIVE:"dev"
+create configmap manifest as above and make the file name as lib-events-producer-configmap.yaml 
+
 
 
 
