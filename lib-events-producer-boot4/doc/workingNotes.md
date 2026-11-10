@@ -360,12 +360,15 @@ curl -v http://172-31-11-99:32519/swagger-ui/swagger-ui/index.html
 crc stop
 crc config set memory 14336
 crc start
+crc start -m 13312 -c 8 -d 62
 
 #View your current memory allocation
 crc config View
 
 #adjust memory
 crc config set memory 14336
+
+oc describe node crc
 
 #deploy kafka cluster
 oc apply -f kafka-cluster-k8s.yml
@@ -377,6 +380,7 @@ oc apply -f lib-events-producer-boot4-deployment-v1.yml
 #to expose it. If your producer has a REST API, you must expose it manually to access it from outside the OpenShift cluster.   
 
 oc expose deployment lib-events-producer-boot4 --port=8080
+		  deployement
 oc expose service lib-events-producer-boot4
 
 oc delete pods --field-selector status.phase!=Running
@@ -384,17 +388,19 @@ oc delete pods --field-selector status.phase!=Running
 #Delete all non-running pods
 oc delete pods --field-selector status.phase!=Running
 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: library-events-producer-config
-  namespace: default
-  labels:
-    app: library-events-producer
-data:
-  SPRING_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:29092,host.docker.internal:29094,host.docker.internal:29096"
-  SPRING_PROFILES_ACTIVE:"dev"
-create configmap manifest as above and make the file name as lib-events-producer-configmap.yaml 
+#URL listed under the HOST/PORT column to access the application in your Windows browser.
+oc get route lib-events-producer-boot4
+
+#url of swagger ui for producer app
+http://lib-events-producer-boot4-kafka-ws.apps-crc.testing/swagger-ui/swagger-ui/index.html
+
+oc describe node crc | grep -A5 DiskPressure
+
+#create route in OpenShift
+oc expose service lib-events-producer-boot4 \
+  --name=lib-events-producer-boot4-route \
+  --hostname=library-events-producer.apps.paremal.com \
+  --port=8080
 
 
 
