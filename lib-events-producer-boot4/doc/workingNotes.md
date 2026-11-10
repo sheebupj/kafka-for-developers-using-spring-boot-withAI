@@ -355,4 +355,38 @@ kubectl logs -f pod/lib-events-producer-boot4-8678b5447d-6cmnx
  curl -v http://172.31.36.85:32519/swagger-ui/swagger-ui/index.html
 curl -v http://172-31-11-99:32519/swagger-ui/swagger-ui/index.html
 
+#Opeshift Commands
+
+crc stop
+crc config set memory 14336
+crc start
+
+#View your current memory allocation
+crc config View
+
+#adjust memory
+crc config set memory 14336
+
+#deploy kafka cluster
+oc apply -f kafka-cluster-k8s.yml
+
+#deploy springboot producer
+oc apply -f lib-events-producer-boot4-deployment-v1.yml
+
+#Create a Service and Route: The lib-events-producer-boot4-deployment-v1.yml file defines container port 8080 but does not include a Kubernetes Service 
+#to expose it. If your producer has a REST API, you must expose it manually to access it from outside the OpenShift cluster.   
+
+oc expose deployment lib-events-producer-boot4 --port=8080
+oc expose service lib-events-producer-boot4
+
+oc delete pods --field-selector status.phase!=Running
+
+#Delete all non-running pods
+oc delete pods --field-selector status.phase!=Running
+
+
+
+
+
+
 
